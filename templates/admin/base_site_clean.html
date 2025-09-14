@@ -1,0 +1,319 @@
+{% extends "admin/base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ title }} | {% trans 'نظام إدارة المستشفى' %}{% endblock %}
+
+{% block branding %}
+<div class="clean-header">
+    <!-- Top Bar: System Brand + User Controls -->
+    <div class="top-bar">
+        <div class="system-brand">
+            <span class="brand-icon">🏥</span>
+            <h1 class="brand-title">{% trans 'نظام إدارة المستشفى' %}</h1>
+        </div>
+        <div class="user-controls">
+            <div class="user-info">
+                <span class="user-name">أهلاً، {{ user.get_full_name|default:user.username }}</span>
+            </div>
+            <div class="control-buttons">
+                <a href="/" class="control-btn" title="عرض الموقع">
+                    <span class="btn-icon">🌐</span>
+                </a>
+                <a href="{% url 'admin:password_change' %}" class="control-btn" title="غيّر كلمة المرور">
+                    <span class="btn-icon">🔒</span>
+                </a>
+                <button class="control-btn theme-toggle" onclick="toggleTheme()" title="تبديل المظهر">
+                    <span class="btn-icon theme-icon">🌙</span>
+                </button>
+                <a href="{% url 'admin:logout' %}" class="control-btn logout" title="تسجيل الخروج">
+                    <span class="btn-icon">🚪</span>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Navigation Menu -->
+    <nav class="main-navigation">
+        <a href="{% url 'admin:index' %}" class="nav-item">
+            <span class="nav-icon">🏠</span>
+            <span class="nav-label">{% trans 'الرئيسية' %}</span>
+        </a>
+        <a href="{% url 'admin:accounts_user_changelist' %}" class="nav-item">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label">{% trans 'المستخدمون' %}</span>
+        </a>
+        <a href="{% url 'admin:hospital_center_changelist' %}" class="nav-item">
+            <span class="nav-icon">🏥</span>
+            <span class="nav-label">{% trans 'المراكز الطبية' %}</span>
+        </a>
+        <a href="{% url 'admin:hospital_doctor_changelist' %}" class="nav-item">
+            <span class="nav-icon">👨‍⚕️</span>
+            <span class="nav-label">{% trans 'الأطباء' %}</span>
+        </a>
+        <a href="{% url 'admin:hospital_staff_changelist' %}" class="nav-item">
+            <span class="nav-icon">👨‍💼</span>
+            <span class="nav-label">{% trans 'الموظفون' %}</span>
+        </a>
+        <a href="{% url 'admin:patients_patient_changelist' %}" class="nav-item">
+            <span class="nav-icon">🤒</span>
+            <span class="nav-label">{% trans 'المرضى' %}</span>
+        </a>
+        <a href="{% url 'admin:reports_report_changelist' %}" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">{% trans 'التقارير' %}</span>
+        </a>
+    </nav>
+</div>
+{% endblock %}
+
+{% block nav-global %}
+<!-- Navigation is now handled in branding block -->
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static 'admin/css/arabic_admin.css' %}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+    /* Clean, Focused Header Design */
+    .clean-header {
+        background: white;
+        border-bottom: 1px solid var(--gray-200);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        margin-bottom: var(--space-8);
+    }
+    
+    /* Top Bar: System Brand + User Controls */
+    .top-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: var(--space-4) var(--space-8);
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+        color: white;
+    }
+    
+    .system-brand {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+    }
+    
+    .brand-icon {
+        font-size: 1.8em;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    }
+    
+    .brand-title {
+        font-size: var(--text-xl);
+        font-weight: 700;
+        margin: 0;
+        color: white;
+    }
+    
+    .user-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+    }
+    
+    .user-info {
+        display: flex;
+        align-items: center;
+    }
+    
+    .user-name {
+        font-size: var(--text-sm);
+        font-weight: 500;
+        color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .control-buttons {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .control-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 40px;
+        height: 40px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        text-decoration: none;
+        transition: all var(--transition-fast);
+        cursor: pointer;
+    }
+    
+    .control-btn:hover {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+    }
+    
+    .control-btn.logout:hover {
+        background: rgba(239, 68, 68, 0.2);
+        border-color: rgba(239, 68, 68, 0.3);
+    }
+    
+    .btn-icon {
+        font-size: 1.1em;
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2));
+    }
+    
+    /* Main Navigation - Clean and Simple */
+    .main-navigation {
+        display: flex;
+        background: white;
+        border-bottom: 1px solid var(--gray-200);
+        padding: 0 var(--space-8);
+        overflow-x: auto;
+        scrollbar-width: none;
+        -ms-overflow-style: none;
+    }
+    
+    .main-navigation::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .nav-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: var(--space-4) var(--space-6);
+        text-decoration: none;
+        color: var(--gray-600);
+        transition: all var(--transition-fast);
+        border-bottom: 3px solid transparent;
+        min-width: 120px;
+        text-align: center;
+    }
+    
+    .nav-item:hover {
+        color: var(--primary-600);
+        background: var(--primary-50);
+        border-bottom-color: var(--primary-300);
+    }
+    
+    .nav-item.active {
+        color: var(--primary-700);
+        background: var(--primary-50);
+        border-bottom-color: var(--primary-600);
+    }
+    
+    .nav-icon {
+        font-size: 1.5em;
+        margin-bottom: var(--space-1);
+        filter: drop-shadow(0 1px 2px rgba(0,0,0,0.1));
+    }
+    
+    .nav-label {
+        font-size: var(--text-xs);
+        font-weight: 600;
+        white-space: nowrap;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .top-bar {
+            padding: var(--space-3) var(--space-4);
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+        
+        .user-controls {
+            flex-direction: column;
+            gap: var(--space-3);
+        }
+        
+        .main-navigation {
+            padding: 0 var(--space-4);
+        }
+        
+        .nav-item {
+            min-width: 100px;
+            padding: var(--space-3) var(--space-4);
+        }
+        
+        .nav-icon {
+            font-size: 1.3em;
+        }
+        
+        .nav-label {
+            font-size: 0.7rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .top-bar {
+            padding: var(--space-2) var(--space-3);
+        }
+        
+        .brand-title {
+            font-size: var(--text-lg);
+        }
+        
+        .nav-item {
+            min-width: 80px;
+            padding: var(--space-2) var(--space-3);
+        }
+        
+        .nav-icon {
+            font-size: 1.2em;
+        }
+    }
+    
+    /* Accessibility */
+    .control-btn:focus,
+    .nav-item:focus {
+        outline: 2px solid var(--primary-500);
+        outline-offset: 2px;
+    }
+</style>
+
+<script>
+// Theme Toggle Functionality
+function toggleTheme() {
+    const body = document.body;
+    const themeIcon = document.querySelector('.theme-icon');
+    
+    // Toggle dark/light theme
+    if (body.classList.contains('light-theme')) {
+        // Switch to dark theme
+        body.classList.remove('light-theme');
+        body.classList.add('dark-theme');
+        localStorage.setItem('theme', 'dark');
+        themeIcon.textContent = '🌙';
+    } else {
+        // Switch to light theme
+        body.classList.remove('dark-theme');
+        body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+        themeIcon.textContent = '☀️';
+    }
+}
+
+// Initialize theme on page load
+document.addEventListener('DOMContentLoaded', function() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    const body = document.body;
+    const themeIcon = document.querySelector('.theme-icon');
+    
+    if (savedTheme === 'light') {
+        body.classList.add('light-theme');
+        themeIcon.textContent = '☀️';
+    } else {
+        body.classList.add('dark-theme');
+        themeIcon.textContent = '🌙';
+    }
+});
+</script>
+{% endblock %}

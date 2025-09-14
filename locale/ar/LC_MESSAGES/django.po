@@ -1,0 +1,61 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: ar\n"
+
+msgid "Users"
+msgstr "المستخدمون"
+
+msgid "Groups"
+msgstr "المجموعات"
+
+msgid "Add user"
+msgstr "إضافة مستخدم"
+
+msgid "Change user"
+msgstr "تعديل مستخدم"
+
+msgid "Delete user"
+msgstr "حذف مستخدم"
+
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+msgid "First name"
+msgstr "الاسم الأول"
+
+msgid "Last name"
+msgstr "الاسم الأخير"
+
+msgid "Phone number"
+msgstr "رقم الهاتف"
+
+msgid "Role"
+msgstr "الدور"
+
+msgid "Is verified"
+msgstr "مُتحقق منه"
+
+msgid "Is active"
+msgstr "نشط"
+
+msgid "Created at"
+msgstr "تاريخ الإنشاء"
+
+msgid "Updated at"
+msgstr "تاريخ التحديث"
+
+msgid "Last login"
+msgstr "آخر تسجيل دخول"
+
+msgid "Date joined"
+msgstr "تاريخ الانضمام"
+
+msgid "Personal info"
+msgstr "المعلومات الشخصية"
+
+msgid "Permissions"
+msgstr "الصلاحيات"
+
+msgid "Important dates"
+msgstr "التواريخ المهمة"

@@ -1,0 +1,455 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<style>
+    /* Fix select box text visibility */
+    select {
+        color: #000 !important;
+        background-color: #fff !important;
+        background: #fff !important;
+    }
+    
+    select option {
+        color: #000 !important;
+        background-color: #fff !important;
+        background: #fff !important;
+    }
+    
+    /* Ensure selected text is visible */
+    select:focus {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    select option:checked {
+        color: #000 !important;
+        background-color: #e9ecef !important;
+    }
+    
+    /* Target specific select fields */
+    #id_city, #id_center, #id_doctor, #id_gender, #id_blood_group {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    #id_city option, #id_center option, #id_doctor option, #id_gender option, #id_blood_group option {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Override any conflicting styles */
+    .form-row select, .field-city select, .field-center select, .field-doctor select {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Force visibility for selected text */
+    select option:selected {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Override any admin CSS that might be hiding text */
+    .admin-interface select,
+    .admin-interface select option,
+    .admin-interface select option:selected {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Ensure text is visible in all states */
+    select:not(:focus) {
+        color: #000 !important;
+    }
+    
+    select:focus {
+        color: #000 !important;
+    }
+    
+    /* Fix select box appearance and text visibility */
+    select {
+        border: 1px solid #dee2e6 !important;
+        border-radius: 4px !important;
+        /* Force native appearance to ensure text visibility */
+        appearance: auto !important;
+        -webkit-appearance: auto !important;
+        -moz-appearance: auto !important;
+        /* Remove custom background image that might be covering text */
+        background-image: none !important;
+        /* Reset padding to prevent text clipping */
+        padding-right: 8px !important;
+        /* Ensure text is visible */
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    select option {
+        padding: 8px 12px !important;
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Override any conflicting admin CSS */
+    .admin-interface select,
+    .admin-interface select:focus,
+    .admin-interface select:not(:focus) {
+        appearance: auto !important;
+        -webkit-appearance: auto !important;
+        -moz-appearance: auto !important;
+        background-image: none !important;
+        padding-right: 8px !important;
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Force text visibility for all select states */
+    select:focus,
+    select:not(:focus),
+    select:hover,
+    select:active {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+</style>
+<script>
+$(document).ready(function() {
+    // Force native appearance and proper styling for all select elements
+    $('select').css({
+        'color': '#000',
+        'background-color': '#fff',
+        'background': '#fff',
+        'appearance': 'auto',
+        '-webkit-appearance': 'auto',
+        '-moz-appearance': 'auto',
+        'background-image': 'none',
+        'padding-right': '8px'
+    });
+    
+    $('select option').css({
+        'color': '#000',
+        'background-color': '#fff',
+        'background': '#fff'
+    });
+    
+    // Force text visibility on change with detailed debugging
+    $('select').on('change', function() {
+        var $this = $(this);
+        var selectedValue = $this.val();
+        var selectedText = $this.find('option:selected').text();
+        var selectedOption = $this.find('option:selected');
+        
+        // Apply styling
+        $this.css({
+            'color': '#000',
+            'background-color': '#fff',
+            'appearance': 'auto',
+            '-webkit-appearance': 'auto',
+            '-moz-appearance': 'auto',
+            'background-image': 'none',
+            'padding-right': '8px'
+        });
+        
+        // Detailed debugging
+        console.log('=== SELECT CHANGE DEBUG ===');
+        console.log('Element ID:', this.id);
+        console.log('Selected value:', selectedValue);
+        console.log('Selected text:', selectedText);
+        console.log('Selected option element:', selectedOption[0]);
+        console.log('Element computed styles:');
+        console.log('  - color:', window.getComputedStyle(this).color);
+        console.log('  - background-color:', window.getComputedStyle(this).backgroundColor);
+        console.log('  - appearance:', window.getComputedStyle(this).appearance);
+        console.log('  - display:', window.getComputedStyle(this).display);
+        console.log('  - visibility:', window.getComputedStyle(this).visibility);
+        console.log('  - opacity:', window.getComputedStyle(this).opacity);
+        console.log('Element innerHTML:', this.innerHTML);
+        console.log('Element value:', this.value);
+        console.log('Element textContent:', this.textContent);
+        console.log('========================');
+        
+        // Simple approach - just force styling
+        $this.css({
+            'color': '#000 !important',
+            'background-color': '#fff !important'
+        });
+        
+        console.log('Applied styling to show selected text');
+    });
+    
+    // Force text visibility on focus
+    $('select').on('focus', function() {
+        $(this).css({
+            'color': '#000',
+            'background-color': '#fff',
+            'appearance': 'auto',
+            '-webkit-appearance': 'auto',
+            '-moz-appearance': 'auto',
+            'background-image': 'none',
+            'padding-right': '8px'
+        });
+    });
+    
+    // Create visual indicators for selected values
+    function createSelectionIndicator() {
+        $('select').each(function() {
+            var $select = $(this);
+            var selectedText = $select.find('option:selected').text();
+            var selectId = $select.attr('id');
+            
+            // Remove existing indicator
+            $select.siblings('.selection-indicator').remove();
+            
+            // Create new indicator
+            if (selectedText && selectedText !== '---------') {
+                var indicator = $('<div class="selection-indicator" style="position: absolute; top: 50%; left: 8px; transform: translateY(-50%); color: #000; background: #fff; padding: 2px 4px; border-radius: 2px; font-size: 12px; pointer-events: none; z-index: 1000;">' + selectedText + '</div>');
+                $select.parent().css('position', 'relative').append(indicator);
+                console.log('Created indicator for', selectId, ':', selectedText);
+            }
+        });
+    }
+    
+    // Create custom select display that shows selected text
+    function createCustomSelectDisplay() {
+        $('select').each(function() {
+            var $select = $(this);
+            var selectedText = $select.find('option:selected').text();
+            var selectId = $select.attr('id');
+            
+            // Remove existing custom display
+            $select.siblings('.custom-select-display').remove();
+            
+            // Create custom display that shows selected text
+            if (selectedText && selectedText !== '---------' && selectedText !== 'اختر المدينة' && selectedText !== 'اختر المستشفى' && selectedText !== 'اختر الطبيب') {
+                var display = $('<div class="custom-select-display" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; align-items: center; padding: 8px 12px; color: #000; background: #fff; border: 1px solid #dee2e6; border-radius: 4px; pointer-events: none; z-index: 1000; font-size: 14px;">' + selectedText + '</div>');
+                $select.parent().css('position', 'relative').append(display);
+                console.log('Created custom display for', selectId, ':', selectedText);
+            }
+        });
+    }
+    
+    // Call both functions on page load and after changes
+    createSelectionIndicator();
+    createCustomSelectDisplay();
+    
+    // Update indicators when selections change (with debouncing)
+    var indicatorTimeout;
+    $('select').on('change', function() {
+        clearTimeout(indicatorTimeout);
+        indicatorTimeout = setTimeout(function() {
+            createSelectionIndicator();
+            createCustomSelectDisplay();
+        }, 200);
+    });
+    
+    // Enhanced phone number validation for patient_id field
+    function validatePhoneNumber(phone) {
+        var phoneRegex = /^0[17][0-9]{9}$/;
+        return phoneRegex.test(phone);
+    }
+    
+    function showPhoneValidationMessage(message, isError = true) {
+        var existingMsg = $('#phone-validation-message');
+        if (existingMsg.length) {
+            existingMsg.remove();
+        }
+        
+        var messageClass = isError ? 'error' : 'success';
+        var icon = isError ? '❌' : '✅';
+        var messageHtml = '<div id="phone-validation-message" class="' + messageClass + '" style="margin-top: 5px; padding: 5px 10px; border-radius: 4px; font-size: 12px; ' + 
+                         (isError ? 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' : 'background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;') + '">' +
+                         icon + ' ' + message + '</div>';
+        
+        $('#id_patient_id').parent().append(messageHtml);
+    }
+    
+    function checkPhoneUniqueness(phone) {
+        if (phone.length === 11 && validatePhoneNumber(phone)) {
+            $.ajax({
+                url: '/api/v1/patients/check-phone-uniqueness/',
+                method: 'GET',
+                data: { 'phone': phone },
+                success: function(response) {
+                    if (response.exists) {
+                        showPhoneValidationMessage('رقم الهاتف هذا مستخدم بالفعل لمريض آخر', true);
+                        $('#id_patient_id').addClass('error');
+                    } else {
+                        showPhoneValidationMessage('رقم الهاتف صحيح ومتاح', false);
+                        $('#id_patient_id').removeClass('error');
+                    }
+                },
+                error: function() {
+                    // If API is not available, just validate format
+                    if (validatePhoneNumber(phone)) {
+                        showPhoneValidationMessage('رقم الهاتف صحيح', false);
+                        $('#id_patient_id').removeClass('error');
+                    }
+                }
+            });
+        }
+    }
+    
+    $('#id_patient_id').on('input', function() {
+        var phone = this.value;
+        
+        // Remove any non-numeric characters
+        this.value = phone.replace(/[^0-9]/g, '');
+        phone = this.value;
+        
+        // Limit to 11 digits
+        if (phone.length > 11) {
+            this.value = phone.slice(0, 11);
+            phone = this.value;
+        }
+        
+        // Clear previous validation messages
+        $('#phone-validation-message').remove();
+        $('#id_patient_id').removeClass('error');
+        
+        // Real-time validation
+        if (phone.length > 0) {
+            if (phone.length < 11) {
+                showPhoneValidationMessage('رقم الهاتف يجب أن يكون 11 رقماً', true);
+                $('#id_patient_id').addClass('error');
+            } else if (!validatePhoneNumber(phone)) {
+                showPhoneValidationMessage('رقم الهاتف يجب أن يبدأ بـ 07 أو 01', true);
+                $('#id_patient_id').addClass('error');
+            } else {
+                // Check uniqueness with debounce
+                clearTimeout(window.phoneCheckTimeout);
+                window.phoneCheckTimeout = setTimeout(function() {
+                    checkPhoneUniqueness(phone);
+                }, 500);
+            }
+        }
+    });
+    
+    // Prevent non-numeric input on keypress
+    $('#id_patient_id').on('keypress', function(e) {
+        // Allow: backspace, delete, tab, escape, enter
+        if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+            // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+            (e.keyCode === 65 && e.ctrlKey === true) ||
+            (e.keyCode === 67 && e.ctrlKey === true) ||
+            (e.keyCode === 86 && e.ctrlKey === true) ||
+            (e.keyCode === 88 && e.ctrlKey === true)) {
+            return;
+        }
+        // Ensure that it is a number and stop the keypress
+        if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+            e.preventDefault();
+        }
+    });
+    
+    // Add CSS for error state
+    $('<style>')
+        .prop('type', 'text/css')
+        .html('#id_patient_id.error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }')
+        .appendTo('head');
+    
+    // Ensure user display field is populated
+    $(document).ready(function() {
+        var userDisplayField = $('#id_user_display');
+        if (userDisplayField.length && !userDisplayField.val()) {
+            // Get the current user info from the page or set a default
+            var currentUser = '{{ request.user.get_full_name }} ({{ request.user.email }})';
+            if (currentUser && currentUser !== ' ()') {
+                userDisplayField.val(currentUser);
+            } else {
+                userDisplayField.val('المستخدم الحالي');
+            }
+        }
+        
+        // Auto-populate doctor field if no doctor is selected
+        var doctorSelect = $('#id_doctor');
+        if (doctorSelect.length && !doctorSelect.val()) {
+            // Try to get doctors from the current center
+            var centerId = $('#id_center').val();
+            if (centerId) {
+                filterDoctors();
+            } else {
+                // If no center selected, try to get any available doctor
+                $.ajax({
+                    url: '/api/v1/patients/admin/get-doctors-by-center/',
+                    data: {'center_id': 'any'},
+                    success: function(data) {
+                        if (data.doctors && data.doctors.length > 0) {
+                            doctorSelect.empty().append('<option value="">اختر الطبيب</option>');
+                            $.each(data.doctors, function(index, doctor) {
+                                doctorSelect.append('<option value="' + doctor.id + '">د. ' + doctor.name + ' - ' + doctor.specialization + '</option>');
+                            });
+                        }
+                    }
+                });
+            }
+        }
+    });
+    
+    // City and Hospital filtering for Admin role
+    if (typeof filterCenters === 'undefined') {
+        window.filterCenters = function() {
+            var cityId = $('#id_city').val();
+            var centerSelect = $('#id_center');
+            var doctorSelect = $('#id_doctor');
+            
+            // Clear center and doctor options
+            centerSelect.empty().append('<option value="">اختر المستشفى</option>');
+            doctorSelect.empty().append('<option value="">اختر الطبيب</option>');
+            
+            if (cityId) {
+                // Fetch centers for selected city
+                $.ajax({
+                    url: '/api/v1/patients/admin/get-centers-by-city/',
+                    data: {'city_id': cityId},
+                    success: function(data) {
+                        $.each(data.centers, function(index, center) {
+                            centerSelect.append('<option value="' + center.id + '">' + center.name + '</option>');
+                        });
+                    }
+                });
+            }
+        };
+        
+        window.filterDoctors = function() {
+            var centerId = $('#id_center').val();
+            var doctorSelect = $('#id_doctor');
+            
+            // Clear doctor options
+            doctorSelect.empty().append('<option value="">اختر الطبيب</option>');
+            
+            if (centerId) {
+                // Fetch doctors for selected center
+                $.ajax({
+                    url: '/api/v1/patients/admin/get-doctors-by-center/',
+                    data: {'center_id': centerId},
+                    success: function(data) {
+                        $.each(data.doctors, function(index, doctor) {
+                            doctorSelect.append('<option value="' + doctor.id + '">د. ' + doctor.name + ' - ' + doctor.specialization + '</option>');
+                        });
+                        
+                        // Auto-select first doctor if only one available
+                        if (data.doctors.length === 1) {
+                            doctorSelect.val(data.doctors[0].id);
+                        }
+                    }
+                });
+            }
+        };
+        
+        window.updateDoctorInfo = function() {
+            var doctorId = $('#id_doctor').val();
+            if (doctorId) {
+                // You can add additional logic here to show doctor info
+                console.log('Selected doctor ID:', doctorId);
+            }
+        };
+    }
+});
+</script>
+{% endblock %}
+
+{% block field_sets %}
+    {{ block.super }}
+{% endblock %}

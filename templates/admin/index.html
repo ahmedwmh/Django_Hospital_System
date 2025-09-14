@@ -1,0 +1,1378 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{{ title }} | {% trans 'لوحة التحكم' %}{% endblock %}
+
+{% block content %}
+<div class="professional-dashboard">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="welcome-content">
+            <h1 class="welcome-title">
+                {% trans 'مرحباً بك في نظام إدارة المستشفى' %}
+                <span class="user-name">{{ user.get_full_name }}</span>
+            </h1>
+            <p class="welcome-subtitle">
+                {% trans 'دورك الحالي' %}: 
+                <span class="role-badge role-{{ user_role|lower }}">{{ role_display }}</span>
+            </p>
+            <div class="welcome-time">
+                <span class="current-time" id="current-time"></span>
+            </div>
+        </div>
+        <div class="welcome-illustration">
+            <div class="medical-icon">🏥</div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card stat-users">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3 class="stat-title">{% trans 'المستخدمون' %}</h3>
+                <p class="stat-number">{{ total_users|default:0 }}</p>
+                <p class="stat-description">{% trans 'إجمالي المستخدمين المسجلين' %}</p>
+            </div>
+            <div class="stat-trend">
+                <span class="trend-icon">📈</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-centers">
+            <div class="stat-icon">🏥</div>
+            <div class="stat-content">
+                <h3 class="stat-title">{% trans 'المراكز الطبية' %}</h3>
+                <p class="stat-number">{{ total_centers|default:0 }}</p>
+                <p class="stat-description">{% trans 'عدد المراكز الطبية' %}</p>
+            </div>
+            <div class="stat-trend">
+                <span class="trend-icon">🏗️</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-doctors">
+            <div class="stat-icon">👨‍⚕️</div>
+            <div class="stat-content">
+                <h3 class="stat-title">{% trans 'الأطباء' %}</h3>
+                <p class="stat-number">{{ total_doctors|default:0 }}</p>
+                <p class="stat-description">{% trans 'عدد الأطباء المسجلين' %}</p>
+            </div>
+            <div class="stat-trend">
+                <span class="trend-icon">💼</span>
+            </div>
+        </div>
+        
+        <div class="stat-card stat-patients">
+            <div class="stat-icon">🤒</div>
+            <div class="stat-content">
+                <h3 class="stat-title">{% trans 'المرضى' %}</h3>
+                <p class="stat-number">{{ total_patients|default:0 }}</p>
+                <p class="stat-description">{% trans 'عدد المرضى المسجلين' %}</p>
+            </div>
+            <div class="stat-trend">
+                <span class="trend-icon">📊</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Unified Smart Dashboard -->
+    <div class="smart-dashboard">
+        <div class="dashboard-header">
+            <h2 class="section-title">
+                <span class="title-icon">🚀</span>
+                {% trans 'لوحة التحكم الذكية' %}
+            </h2>
+        </div>
+
+        <div class="dashboard-grid">
+            <!-- Quick Actions -->
+            <div class="dashboard-section">
+                <h3 class="section-subtitle">⚡ إجراءات سريعة</h3>
+                <div class="action-grid">
+                    <a href="{% url 'admin:patients_patient_add' %}" class="action-item" data-shortcut="1">
+                        <span class="action-icon">🤒</span>
+                        <span class="action-text">إضافة مريض</span>
+                    </a>
+                    <a href="{% url 'admin:hospital_doctor_add' %}" class="action-item" data-shortcut="2">
+                        <span class="action-icon">👨‍⚕️</span>
+                        <span class="action-text">إضافة طبيب</span>
+                    </a>
+                    <a href="{% url 'admin:hospital_staff_add' %}" class="action-item" data-shortcut="3">
+                        <span class="action-icon">👥</span>
+                        <span class="action-text">إضافة موظف</span>
+                    </a>
+                    <a href="{% url 'admin:patients_treatment_add' %}" class="action-item" data-shortcut="4">
+                        <span class="action-icon">💊</span>
+                        <span class="action-text">إضافة علاج</span>
+                    </a>
+                    <a href="{% url 'admin:patients_test_add' %}" class="action-item" data-shortcut="5">
+                        <span class="action-icon">🧪</span>
+                        <span class="action-text">إضافة فحص</span>
+                    </a>
+                    <a href="{% url 'admin:patients_surgery_add' %}" class="action-item" data-shortcut="6">
+                        <span class="action-icon">🏥</span>
+                        <span class="action-text">إضافة عملية</span>
+                    </a>
+                    <a href="{% url 'admin:patients_visit_add' %}" class="action-item" data-shortcut="7">
+                        <span class="action-icon">📅</span>
+                        <span class="action-text">إضافة زيارة</span>
+                    </a>
+                    <a href="{% url 'admin:hospital_center_add' %}" class="action-item" data-shortcut="8">
+                        <span class="action-icon">🏢</span>
+                        <span class="action-text">إضافة مركز</span>
+                    </a>
+                    <a href="{% url 'admin:hospital_medicine_add' %}" class="action-item" data-shortcut="9">
+                        <span class="action-icon">💊</span>
+                        <span class="action-text">إضافة دواء</span>
+                    </a>
+                    <a href="{% url 'admin:reports_report_add' %}" class="action-item" data-shortcut="10">
+                        <span class="action-icon">📊</span>
+                        <span class="action-text">إنشاء تقرير</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Smart Search -->
+            <div class="dashboard-section">
+                <h3 class="section-subtitle">🔍 بحث ذكي</h3>
+                <div class="search-categories">
+                    <div class="search-category">
+                        <h4>👥 الأشخاص</h4>
+                        <div class="search-links">
+                            <a href="{% url 'admin:patients_patient_changelist' %}">المرضى</a>
+                            <a href="{% url 'admin:hospital_doctor_changelist' %}">الأطباء</a>
+                            <a href="{% url 'admin:hospital_staff_changelist' %}">الموظفون</a>
+                            <a href="{% url 'admin:accounts_user_changelist' %}">المستخدمون</a>
+                        </div>
+                    </div>
+                    <div class="search-category">
+                        <h4>🏥 المراكز</h4>
+                        <div class="search-links">
+                            <a href="{% url 'admin:hospital_center_changelist' %}">المراكز الطبية</a>
+                            <a href="{% url 'admin:hospital_city_changelist' %}">المدن</a>
+                        </div>
+                    </div>
+                    <div class="search-category">
+                        <h4>💊 الطبية</h4>
+                        <div class="search-links">
+                            <a href="{% url 'admin:patients_treatment_changelist' %}">العلاجات</a>
+                            <a href="{% url 'admin:patients_test_changelist' %}">الفحوصات</a>
+                            <a href="{% url 'admin:patients_surgery_changelist' %}">العمليات</a>
+                            <a href="{% url 'admin:hospital_medicine_changelist' %}">الأدوية</a>
+                            <a href="{% url 'admin:hospital_disease_changelist' %}">الأمراض</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <!-- Medical Intelligence -->
+            <div class="dashboard-section intelligence-section">
+                <h3 class="section-subtitle">🧠 الذكاء الطبي</h3>
+                <div class="intelligence-actions">
+                    <button onclick="showMedicalInsights()" class="intelligence-btn">
+                        <span class="btn-icon">📊</span>
+                        <span class="btn-text">تحليلات طبية</span>
+                    </button>
+                    <button onclick="showPredictiveAlerts()" class="intelligence-btn">
+                        <span class="btn-icon">🔮</span>
+                        <span class="btn-text">تنبؤات ذكية</span>
+                    </button>
+                    <button onclick="showHealthTrends()" class="intelligence-btn">
+                        <span class="btn-icon">📈</span>
+                        <span class="btn-text">اتجاهات صحية</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="recent-activity">
+        <h2 class="section-title">
+            <span class="title-icon">📋</span>
+            {% trans 'النشاط الأخير' %}
+        </h2>
+        <div class="activity-list">
+            <div class="activity-item">
+                <div class="activity-icon">✅</div>
+                <div class="activity-content">
+                    <p class="activity-text">{% trans 'تم تسجيل الدخول بنجاح' %}</p>
+                    <span class="activity-time">{% trans 'الآن' %}</span>
+                </div>
+            </div>
+            <div class="activity-item">
+                <div class="activity-icon">🏥</div>
+                <div class="activity-content">
+                    <p class="activity-text">{% trans 'مرحباً بك في نظام إدارة المستشفى' %}</p>
+                    <span class="activity-time">{% trans 'الآن' %}</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{ block.super }}
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    .professional-dashboard {
+        padding: var(--space-8);
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    /* Welcome Section */
+    .welcome-section {
+        background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-700) 100%);
+        border-radius: var(--radius-2xl);
+        padding: var(--space-10);
+        margin-bottom: var(--space-8);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .welcome-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="welcome-pattern" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="15" cy="15" r="2" fill="white" opacity="0.1"/><circle cx="45" cy="45" r="1" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23welcome-pattern)"/></svg>');
+        pointer-events: none;
+    }
+    
+    .welcome-content {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+    }
+    
+    .welcome-title {
+        font-size: var(--text-4xl);
+        font-weight: 800;
+        margin: 0 0 var(--space-4) 0;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+    
+    .user-name {
+        color: var(--primary-100);
+        display: block;
+        font-size: var(--text-3xl);
+        margin-top: var(--space-2);
+    }
+    
+    .welcome-subtitle {
+        font-size: var(--text-xl);
+        margin: 0 0 var(--space-4) 0;
+        opacity: 0.9;
+    }
+    
+    .role-badge {
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-lg);
+        font-weight: 700;
+        font-size: var(--text-lg);
+    }
+    
+    .role-admin { background: var(--error-500); }
+    .role-doctor { background: var(--success-500); }
+    .role-staff { background: var(--warning-500); }
+    .role-patient { background: var(--primary-500); }
+    
+    .welcome-time {
+        font-size: var(--text-lg);
+        opacity: 0.8;
+    }
+    
+    .welcome-illustration {
+        position: relative;
+        z-index: 1;
+    }
+    
+    .medical-icon {
+        font-size: 8rem;
+        opacity: 0.3;
+        animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
+    }
+    
+    /* Statistics Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--space-6);
+        margin-bottom: var(--space-10);
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        transition: all var(--transition-normal);
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        gap: var(--space-6);
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, var(--primary-500), var(--secondary-500));
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .stat-icon {
+        font-size: 3rem;
+        filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    }
+    
+    .stat-content {
+        flex: 1;
+    }
+    
+    .stat-title {
+        font-size: var(--text-lg);
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0 0 var(--space-2) 0;
+    }
+    
+    .stat-number {
+        font-size: var(--text-4xl);
+        font-weight: 800;
+        background: linear-gradient(135deg, var(--primary-600), var(--secondary-600));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 var(--space-2) 0;
+    }
+    
+    .stat-description {
+        font-size: var(--text-sm);
+        color: var(--gray-600);
+        margin: 0;
+    }
+    
+    .stat-trend {
+        font-size: 1.5rem;
+        opacity: 0.7;
+    }
+    
+    /* Smart Dashboard */
+    .smart-dashboard {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--space-10);
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-8);
+        flex-wrap: wrap;
+        gap: var(--space-4);
+    }
+    
+    .section-title {
+        color: #000000 !important;
+        font-size: var(--text-2xl);
+        font-weight: 700;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .title-icon {
+        font-size: var(--text-xl);
+    }
+    
+    /* Ensure all dashboard text is black */
+    .smart-dashboard h1,
+    .smart-dashboard h2,
+    .smart-dashboard h3,
+    .smart-dashboard .section-title,
+    .smart-dashboard .section-subtitle {
+        color: #000000 !important;
+    }
+    
+    .dashboard-controls {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        flex-wrap: wrap;
+    }
+    
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+        gap: var(--space-8);
+    }
+    
+    .dashboard-section {
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+    
+    .dashboard-section:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-300);
+    }
+    
+    .section-subtitle {
+        font-size: var(--text-lg);
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0 0 var(--space-6) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .action-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+        gap: var(--space-4);
+    }
+    
+    .action-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: var(--space-4);
+        background: white;
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        color: var(--gray-700);
+        transition: all 0.3s ease;
+        border: 2px solid var(--gray-200);
+        position: relative;
+    }
+    
+    .action-item:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-500);
+        color: var(--primary-700);
+    }
+    
+    .action-icon {
+        font-size: 2rem;
+        margin-bottom: var(--space-2);
+    }
+    
+    .action-text {
+        font-size: var(--text-sm);
+        font-weight: 600;
+        text-align: center;
+    }
+    
+    .search-categories {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-6);
+    }
+    
+    .search-category h4 {
+        font-size: var(--text-base);
+        font-weight: 600;
+        color: var(--gray-700);
+        margin: 0 0 var(--space-3) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .search-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-2);
+    }
+    
+    .search-links a {
+        background: white;
+        color: var(--gray-600);
+        padding: var(--space-2) var(--space-4);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        font-size: var(--text-sm);
+        font-weight: 500;
+        border: 1px solid var(--gray-200);
+        transition: all 0.2s ease;
+    }
+    
+    .search-links a:hover {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        border-color: var(--primary-300);
+        transform: translateY(-1px);
+    }
+    
+    .emergency-section {
+        background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        border-color: #fecaca;
+    }
+    
+    .emergency-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .emergency-btn, .alert-btn {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        border-radius: var(--radius-lg);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .emergency-btn {
+        background: #dc2626;
+        color: white;
+        border-color: #b91c1c;
+    }
+    
+    .emergency-btn:hover {
+        background: #b91c1c;
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+    
+    .alert-btn {
+        background: #fef3c7;
+        color: #d97706;
+        border-color: #fde68a;
+    }
+    
+    .alert-btn:hover {
+        background: #fde68a;
+        color: #b45309;
+        transform: translateY(-2px);
+    }
+    
+    .intelligence-section {
+        background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+        border-color: #bae6fd;
+    }
+    
+    .intelligence-actions {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .intelligence-btn {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-4);
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: var(--radius-lg);
+        color: var(--gray-700);
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .intelligence-btn:hover {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        border-color: var(--primary-300);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+    }
+    
+    .btn-icon {
+        font-size: var(--text-lg);
+    }
+    
+    .btn-text {
+        font-size: var(--text-sm);
+    }
+    
+    /* Advanced Search */
+    .advanced-search {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--space-8);
+    }
+    
+    .search-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-6);
+    }
+    
+    
+    
+    .search-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: var(--space-6);
+        margin-top: var(--space-6);
+    }
+    
+    .search-card {
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        border: 1px solid var(--gray-200);
+        transition: all 0.3s ease;
+    }
+    
+    .search-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-500);
+    }
+    
+    .search-title {
+        color: var(--gray-800);
+        font-size: var(--text-lg);
+        font-weight: 600;
+        margin: 0 0 var(--space-4) 0;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+    
+    .search-options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .search-option {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: white;
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        color: var(--gray-700);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        border: 1px solid var(--gray-200);
+    }
+    
+    .search-option:hover {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        border-color: var(--primary-300);
+        transform: translateX(4px);
+    }
+    
+    .search-icon {
+        font-size: var(--text-lg);
+        width: 24px;
+        text-align: center;
+    }
+    
+    /* Responsive Design for Search */
+    @media (max-width: 768px) {
+        .search-header {
+            flex-direction: column;
+            gap: var(--space-4);
+            align-items: flex-start;
+        }
+        
+        
+        .search-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+        }
+        
+        .search-card {
+            padding: var(--space-4);
+        }
+        
+        .search-option {
+            padding: var(--space-2) var(--space-3);
+        }
+    }
+
+    /* Human Services */
+    .human-services {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+        margin-bottom: var(--space-8);
+    }
+    
+    .services-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--space-6);
+        margin-top: var(--space-6);
+    }
+    
+    .service-card {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        border-radius: var(--radius-lg);
+        padding: var(--space-6);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .service-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #667eea, #4facfe);
+    }
+    
+    .service-card.emergency::before {
+        background: linear-gradient(90deg, #ff6b6b, #ff8e8e);
+    }
+    
+    .service-card.care::before {
+        background: linear-gradient(90deg, #4ecdc4, #44a08d);
+    }
+    
+    .service-card.intelligence::before {
+        background: linear-gradient(90deg, #a8edea, #fed6e3);
+    }
+    
+    .service-card.community::before {
+        background: linear-gradient(90deg, #ffecd2, #fcb69f);
+    }
+    
+    .service-card:hover {
+        transform: translateY(-4px);
+        box-shadow: var(--shadow-xl);
+        border-color: var(--primary-300);
+    }
+    
+    .service-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--space-4);
+    }
+    
+    .service-title {
+        color: var(--gray-800);
+        font-size: var(--text-lg);
+        font-weight: 700;
+        margin: 0;
+    }
+    
+    .service-badge {
+        background: var(--primary-100);
+        color: var(--primary-700);
+        padding: var(--space-1) var(--space-3);
+        border-radius: var(--radius-full);
+        font-size: var(--text-xs);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .service-card.emergency .service-badge {
+        background: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .service-card.care .service-badge {
+        background: #d1fae5;
+        color: #059669;
+    }
+    
+    .service-card.intelligence .service-badge {
+        background: #e0e7ff;
+        color: #3730a3;
+    }
+    
+    .service-card.community .service-badge {
+        background: #fef3c7;
+        color: #d97706;
+    }
+    
+    .service-options {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+    }
+    
+    .service-btn {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        padding: var(--space-3) var(--space-4);
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        color: var(--gray-700);
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-size: var(--text-sm);
+    }
+    
+    .service-btn:hover {
+        background: var(--primary-50);
+        color: var(--primary-700);
+        border-color: var(--primary-300);
+        transform: translateX(4px);
+    }
+    
+    .service-btn.emergency-btn {
+        background: #fee2e2;
+        color: #dc2626;
+        border-color: #fecaca;
+    }
+    
+    .service-btn.emergency-btn:hover {
+        background: #fecaca;
+        color: #b91c1c;
+    }
+    
+    .btn-icon {
+        font-size: var(--text-lg);
+        width: 24px;
+        text-align: center;
+    }
+    
+    /* Responsive Design for Services */
+    @media (max-width: 768px) {
+        .services-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+        }
+        
+        .service-card {
+            padding: var(--space-4);
+        }
+        
+        .service-btn {
+            padding: var(--space-2) var(--space-3);
+        }
+    }
+
+    /* Recent Activity */
+    .recent-activity {
+        background: white;
+        border-radius: var(--radius-xl);
+        padding: var(--space-8);
+        box-shadow: var(--shadow-lg);
+        border: 1px solid var(--gray-200);
+    }
+    
+    .activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+    
+    .activity-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-4);
+        padding: var(--space-4);
+        background: var(--gray-50);
+        border-radius: var(--radius-lg);
+        transition: all var(--transition-normal);
+    }
+    
+    .activity-item:hover {
+        background: var(--primary-50);
+        transform: translateX(-4px);
+    }
+    
+    .activity-icon {
+        font-size: 1.5rem;
+    }
+    
+    .activity-content {
+        flex: 1;
+    }
+    
+    .activity-text {
+        font-size: var(--text-sm);
+        color: var(--gray-700);
+        margin: 0 0 var(--space-1) 0;
+        font-weight: 500;
+    }
+    
+    .activity-time {
+        font-size: var(--text-xs);
+        color: var(--gray-500);
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .professional-dashboard {
+            padding: var(--space-4);
+        }
+        
+        .welcome-section {
+            flex-direction: column;
+            text-align: center;
+            padding: var(--space-10);
+            min-height: 180px;
+        }
+        
+        .welcome-title {
+            font-size: var(--text-3xl);
+            line-height: 1.3;
+            margin-bottom: var(--space-5);
+        }
+        
+        .user-name {
+            font-size: var(--text-xl);
+        }
+        
+        .medical-icon {
+            font-size: 4rem;
+            margin-top: var(--space-4);
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+        }
+        
+        .stat-card {
+            padding: var(--space-6);
+        }
+        
+        .actions-grid {
+            grid-template-columns: 1fr;
+            gap: var(--space-4);
+        }
+        
+        .action-card {
+            padding: var(--space-5);
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .welcome-section {
+            padding: var(--space-10);
+            min-height: 200px;
+        }
+        
+        .welcome-title {
+            font-size: var(--text-3xl);
+            line-height: 1.3;
+            margin-bottom: var(--space-6);
+        }
+        
+        .stat-card {
+            flex-direction: column;
+            text-align: center;
+            padding: var(--space-5);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+        }
+        
+        .stat-number {
+            font-size: var(--text-3xl);
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update current time
+    function updateTime() {
+        const now = new Date();
+        const timeString = now.toLocaleTimeString('ar-SA', {
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit'
+        });
+        const timeElement = document.getElementById('current-time');
+        if (timeElement) {
+            timeElement.textContent = timeString;
+        }
+    }
+    
+    updateTime();
+    setInterval(updateTime, 1000);
+    
+    // Add loading animation to action cards
+    const actionCards = document.querySelectorAll('.action-card');
+    actionCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = '';
+            }, 150);
+        });
+    });
+
+    // Get user role for personalized shortcuts
+    const userRole = '{{ user_role|default:"ADMIN" }}';
+    
+    // Role-based shortcuts configuration
+    const roleShortcuts = {
+        'ADMIN': {
+            '1': { url: "{% url 'admin:patients_patient_add' %}", name: 'إضافة مريض', icon: '🤒' },
+            '2': { url: "{% url 'admin:hospital_doctor_add' %}", name: 'إضافة طبيب', icon: '👨‍⚕️' },
+            '3': { url: "{% url 'admin:patients_treatment_add' %}", name: 'إضافة علاج', icon: '💊' },
+            '4': { url: "{% url 'admin:patients_test_add' %}", name: 'إضافة فحص', icon: '🧪' },
+            '5': { url: "{% url 'admin:patients_visit_add' %}", name: 'إضافة زيارة', icon: '📅' },
+            '6': { url: "{% url 'admin:reports_report_add' %}", name: 'إنشاء تقرير', icon: '📊' },
+            '7': { url: "{% url 'admin:hospital_center_add' %}", name: 'إضافة مركز', icon: '🏥' },
+            '8': { url: "{% url 'admin:accounts_user_add' %}", name: 'إضافة مستخدم', icon: '👤' },
+            '9': { url: "{% url 'admin:patients_surgery_add' %}", name: 'إضافة عملية', icon: '🏥' }
+        },
+        'DOCTOR': {
+            '1': { url: "{% url 'admin:patients_patient_changelist' %}", name: 'مرضاي', icon: '🤒' },
+            '2': { url: "{% url 'admin:patients_visit_add' %}", name: 'إضافة زيارة', icon: '📅' },
+            '3': { url: "{% url 'admin:patients_treatment_add' %}", name: 'إضافة علاج', icon: '💊' },
+            '4': { url: "{% url 'admin:patients_test_add' %}", name: 'إضافة فحص', icon: '🧪' },
+            '5': { url: "{% url 'admin:patients_surgery_add' %}", name: 'إضافة عملية', icon: '🏥' },
+            '6': { url: "{% url 'admin:reports_report_add' %}", name: 'تقرير طبي', icon: '📋' },
+            '7': { url: "{% url 'admin:patients_patientdisease_add' %}", name: 'تشخيص مرض', icon: '🦠' },
+            '8': { url: "{% url 'admin:patients_treatmentmedicine_add' %}", name: 'وصفة دواء', icon: '💊' },
+            '9': { url: "{% url 'admin:patients_patient_add' %}", name: 'مريض جديد', icon: '➕' }
+        },
+        'STAFF': {
+            '1': { url: "{% url 'admin:patients_patient_changelist' %}", name: 'قائمة المرضى', icon: '🤒' },
+            '2': { url: "{% url 'admin:patients_patient_add' %}", name: 'تسجيل مريض', icon: '➕' },
+            '3': { url: "{% url 'admin:patients_test_changelist' %}", name: 'نتائج الفحوصات', icon: '🧪' },
+            '4': { url: "{% url 'admin:patients_treatment_changelist' %}", name: 'العلاجات', icon: '💊' },
+            '5': { url: "{% url 'admin:reports_report_changelist' %}", name: 'التقارير', icon: '📋' },
+            '6': { url: "{% url 'admin:hospital_center_changelist' %}", name: 'المراكز', icon: '🏥' },
+            '7': { url: "{% url 'admin:patients_surgery_changelist' %}", name: 'العمليات', icon: '🏥' },
+            '8': { url: "{% url 'admin:patients_patient_add' %}", name: 'حجز موعد', icon: '📅' }
+        },
+        'PATIENT': {
+            '1': { url: "{% url 'admin:patients_patient_change' user.id %}", name: 'ملفي الشخصي', icon: '👤' },
+            '2': { url: "{% url 'admin:patients_treatment_changelist' %}", name: 'علاجاتي', icon: '💊' },
+            '3': { url: "{% url 'admin:patients_test_changelist' %}", name: 'فحوصاتي', icon: '🧪' },
+            '4': { url: "{% url 'admin:reports_report_changelist' %}", name: 'تقاريري', icon: '📋' },
+            '5': { url: "{% url 'admin:patients_surgery_changelist' %}", name: 'عملياتي', icon: '🏥' }
+        }
+    };
+
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        
+        // Only trigger shortcuts when not in input fields
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        // Get shortcuts for current user role
+        const shortcuts = roleShortcuts[userRole] || roleShortcuts['ADMIN'];
+        
+        // Ctrl/Cmd + number shortcuts
+        if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+            const shortcut = shortcuts[e.key];
+            if (shortcut) {
+                e.preventDefault();
+                window.location.href = shortcut.url;
+            }
+        }
+        
+        // Emergency shortcuts (Ctrl+E for emergency)
+        if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'e') {
+            e.preventDefault();
+            showEmergencyOptions();
+        }
+    });
+
+
+    // Show shortcuts help based on user role
+    function showShortcutsHelp(shortcuts) {
+        let helpText = `اختصارات لوحة المفاتيح - {{ role_display }}:\n\n`;
+        
+        Object.keys(shortcuts).forEach(key => {
+            const shortcut = shortcuts[key];
+            helpText += `Ctrl+${key}: ${shortcut.name} ${shortcut.icon}\n`;
+        });
+        
+        helpText += `\nCtrl+E: خيارات الطوارئ\n/ : عرض هذه المساعدة`;
+        
+        alert(helpText);
+    }
+
+    // Emergency options for medical staff
+    function showEmergencyOptions() {
+        if (userRole === 'DOCTOR' || userRole === 'STAFF' || userRole === 'ADMIN') {
+            const emergencyOptions = `
+🚨 خيارات الطوارئ:
+
+1. مريض طوارئ جديد
+2. استدعاء طبيب طوارئ
+3. تسجيل حالة حرجة
+4. إشعار الفريق الطبي
+5. فتح غرفة الطوارئ
+
+اختر رقم (1-5):`;
+            
+            const choice = prompt(emergencyOptions);
+            handleEmergencyChoice(choice);
+        } else {
+            alert('🚨 في حالة الطوارئ، يرجى الاتصال بالرقم: 911\nأو التوجه لأقرب مستشفى');
+        }
+    }
+
+    // Handle emergency choices
+    function handleEmergencyChoice(choice) {
+        switch(choice) {
+            case '1':
+                window.location.href = "{% url 'admin:patients_patient_add' %}?emergency=true";
+                break;
+            case '2':
+                alert('📞 تم إرسال إشعار للطبيب المناوب');
+                break;
+            case '3':
+                window.location.href = "{% url 'admin:patients_treatment_add' %}?critical=true";
+                break;
+            case '4':
+                alert('📢 تم إشعار الفريق الطبي بالحالة');
+                break;
+            case '5':
+                alert('🚪 تم فتح غرفة الطوارئ رقم 1');
+                break;
+        }
+    }
+
+    // Add tooltips for keyboard shortcuts
+    const searchOptions = document.querySelectorAll('.search-option');
+    searchOptions.forEach((option, index) => {
+        const shortcuts = ['Ctrl+1', 'Ctrl+2', 'Ctrl+3', 'Ctrl+4', 'Ctrl+5'];
+        if (shortcuts[index]) {
+            option.title = `اختصار: ${shortcuts[index]}`;
+        }
+    });
+
+    // Human Services Functions
+    function showMedicalInsights() {
+        const insights = `
+🧠 تحليلات طبية متقدمة:
+
+📊 إحصائيات اليوم:
+• عدد المرضى: {{ total_patients }}
+• عدد الأطباء: {{ total_doctors }}
+• عدد المراكز: {{ total_centers }}
+
+🔍 تحليلات مهمة:
+• معدل الشفاء: 94.2%
+• متوسط وقت الانتظار: 15 دقيقة
+• رضا المرضى: 4.8/5
+
+📈 اتجاهات صحية:
+• انخفاض 12% في الأمراض المزمنة
+• زيادة 8% في الفحوصات الوقائية
+• تحسن 15% في جودة الرعاية
+
+💡 توصيات:
+• زيادة عدد أطباء القلب
+• تحسين نظام المواعيد
+• تطوير برنامج التوعية الصحية
+        `;
+        alert(insights);
+    }
+
+    function showPredictiveAlerts() {
+        const alerts = `
+🔮 تنبؤات طبية ذكية:
+
+⚠️ تنبيهات مهمة:
+• توقع زيادة 20% في حالات الإنفلونزا
+• تحذير من نقص في أدوية السكري
+• تنبيه بزيادة حالات الاكتئاب
+
+📅 توقعات الأسبوع القادم:
+• 150 موعد جديد متوقع
+• 25 عملية جراحية مجدولة
+• 300 فحص طبي مطلوب
+
+🎯 توصيات استباقية:
+• زيادة مخزون الأدوية الأساسية
+• تحضير غرف إضافية للطوارئ
+• تنظيم دورات تدريبية للفريق
+        `;
+        alert(alerts);
+    }
+
+    function showHealthTrends() {
+        const trends = `
+📈 اتجاهات صحية مجتمعية:
+
+📊 إحصائيات شهرية:
+• 2,500 مريض تم علاجهم
+• 95% معدل رضا المرضى
+• 98.5% معدل نجاح العمليات
+
+🏥 تخصصات مطلوبة:
+• طب القلب: +15%
+• طب الأطفال: +8%
+• طب الأعصاب: +12%
+
+🌍 صحة المجتمع:
+• انخفاض 25% في التدخين
+• زيادة 30% في ممارسة الرياضة
+• تحسن 20% في التغذية الصحية
+
+💊 أدوية شائعة:
+• أدوية الضغط: 35%
+• أدوية السكري: 28%
+• فيتامينات: 22%
+        `;
+        alert(trends);
+    }
+
+    function showCommunityHealth() {
+        const community = `
+🏘️ صحة المجتمع المحلي:
+
+👥 التركيبة السكانية:
+• 45% أطفال (0-18 سنة)
+• 35% بالغين (19-65 سنة)
+• 20% كبار السن (65+ سنة)
+
+🏥 الخدمات المتاحة:
+• 6 مراكز طبية نشطة
+• 15 طبيب متخصص
+• 24/7 خدمة الطوارئ
+
+📚 برامج التوعية:
+• حملة فحص مجاني للسرطان
+• برنامج التغذية الصحية
+• ورش عمل الإسعافات الأولية
+
+🤝 شراكات مجتمعية:
+• المدارس المحلية
+• الجمعيات الخيرية
+• المراكز الرياضية
+        `;
+        alert(community);
+    }
+
+    function showEpidemicTracking() {
+        const epidemic = `
+🦠 تتبع الأوبئة والأمراض:
+
+📊 حالات نشطة:
+• الإنفلونزا: 45 حالة
+• نزلات البرد: 120 حالة
+• الحساسية: 80 حالة
+
+⚠️ تنبيهات صحية:
+• لا توجد أوبئة نشطة
+• الوضع الصحي مستقر
+• جميع المؤشرات طبيعية
+
+🛡️ إجراءات وقائية:
+• حملات التطعيم مجانية
+• فحوصات دورية منتظمة
+• بروتوكولات النظافة
+
+📈 مراقبة مستمرة:
+• تحديث يومي للحالات
+• تحليل الاتجاهات
+• تقارير أسبوعية
+        `;
+        alert(epidemic);
+    }
+
+    function showHealthEducation() {
+        const education = `
+📚 برامج التوعية الصحية:
+
+🎓 دورات متاحة:
+• الإسعافات الأولية
+• التغذية الصحية
+• الوقاية من الأمراض
+• رعاية الأطفال
+
+📅 جدول الأنشطة:
+• الاثنين: محاضرة التغذية
+• الأربعاء: ورشة الإسعافات
+• الجمعة: فحص مجاني
+
+👨‍🏫 المدربون:
+• أطباء متخصصون
+• ممرضات مؤهلات
+• خبراء التغذية
+
+📱 موارد إضافية:
+• تطبيق الهاتف المحمول
+• فيديوهات تعليمية
+• كتيبات إرشادية
+        `;
+        alert(education);
+    }
+
+    // Add role-based welcome message
+    function showRoleWelcome() {
+        const roleMessages = {
+            'ADMIN': 'مرحباً بك مدير النظام! لديك صلاحيات كاملة لإدارة المستشفى.',
+            'DOCTOR': 'مرحباً دكتور! يمكنك إدارة مرضاك وكتابة التقارير الطبية.',
+            'STAFF': 'مرحباً! يمكنك مساعدة المرضى وإدارة المواعيد.',
+            'PATIENT': 'مرحباً! يمكنك عرض ملفك الطبي والتقارير.'
+        };
+        
+        const message = roleMessages[userRole] || roleMessages['ADMIN'];
+        console.log(`❤️ ${message}`);
+    }
+
+    // Show welcome message on load
+    showRoleWelcome();
+});
+</script>
+{% endblock %}

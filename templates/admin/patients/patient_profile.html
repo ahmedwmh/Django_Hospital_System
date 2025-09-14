@@ -1,0 +1,955 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}{{ title }} | {{ site_title|default:_('Django site admin') }}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #3b82f6;
+        --primary-dark: #1e40af;
+        --secondary-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #06b6d4;
+        --gray-50: #f9fafb;
+        --gray-100: #f3f4f6;
+        --gray-200: #e5e7eb;
+        --gray-300: #d1d5db;
+        --gray-400: #9ca3af;
+        --gray-500: #6b7280;
+        --gray-600: #4b5563;
+        --gray-700: #374151;
+        --gray-800: #1f2937;
+        --gray-900: #111827;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        -webkit-text-size-adjust: 100%;
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    .patient-profile-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--shadow-xl);
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+        overflow-x: hidden;
+        word-wrap: break-word;
+    }
+
+    .profile-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .profile-header-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+    }
+
+    .patient-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
+    }
+
+    .patient-info h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin: 0 0 0.5rem 0;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .patient-info .subtitle {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin: 0;
+    }
+
+    .patient-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin: 2rem 0;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: var(--shadow-md);
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-lg);
+    }
+
+    .stat-card .icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+
+    .stat-card .icon.diseases { background: var(--danger-color); }
+    .stat-card .icon.tests { background: var(--info-color); }
+    .stat-card .icon.treatments { background: var(--secondary-color); }
+    .stat-card .icon.surgeries { background: var(--warning-color); }
+
+    .stat-card .number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--gray-800);
+        margin: 0;
+    }
+
+    .stat-card .label {
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        margin: 0.5rem 0 0 0;
+    }
+
+    .quick-actions {
+        background: var(--gray-50);
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+    }
+
+    .quick-actions h3 {
+        color: var(--gray-800);
+        margin: 0 0 1.5rem 0;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .action-buttons {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 1rem 1.5rem;
+        background: white;
+        border: 2px solid var(--gray-200);
+        border-radius: 10px;
+        text-decoration: none;
+        color: var(--gray-700);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        box-shadow: var(--shadow-sm);
+        min-height: 48px; /* Minimum touch target size */
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+    }
+
+    .action-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
+        text-decoration: none;
+    }
+
+    .action-btn i {
+        font-size: 1.2rem;
+    }
+
+    .content-sections {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    .section {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+
+    .section-header {
+        background: linear-gradient(135deg, var(--gray-100) 0%, var(--gray-200) 100%);
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--gray-200);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .section-header h3 {
+        margin: 0;
+        color: var(--gray-800);
+        font-size: 1.3rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-content {
+        padding: 1.5rem;
+        max-height: 400px;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
+        scrollbar-width: thin;
+    }
+    
+    .section-content::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .section-content::-webkit-scrollbar-track {
+        background: var(--gray-100);
+        border-radius: 3px;
+    }
+    
+    .section-content::-webkit-scrollbar-thumb {
+        background: var(--gray-300);
+        border-radius: 3px;
+    }
+    
+    .section-content::-webkit-scrollbar-thumb:hover {
+        background: var(--gray-400);
+    }
+
+    .item-card {
+        background: var(--gray-50);
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--primary-color);
+        transition: all 0.3s ease;
+    }
+
+    .item-card:hover {
+        background: white;
+        box-shadow: var(--shadow-sm);
+        transform: translateX(5px);
+    }
+
+    .item-card:last-child {
+        margin-bottom: 0;
+    }
+
+    .item-title {
+        font-weight: 600;
+        color: var(--gray-800);
+        margin: 0 0 0.5rem 0;
+    }
+
+    .item-meta {
+        font-size: 0.9rem;
+        color: var(--gray-600);
+        margin: 0;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .status-active { background: #dcfce7; color: #166534; }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-completed { background: #dbeafe; color: #1e40af; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem 1rem;
+        color: var(--gray-500);
+    }
+
+    .empty-state i {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .patient-details {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow-md);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .patient-details h3 {
+        color: var(--gray-800);
+        margin: 0 0 1.5rem 0;
+        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .details-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .detail-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .detail-label {
+        font-weight: 600;
+        color: var(--gray-600);
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .detail-value {
+        color: var(--gray-800);
+        font-size: 1.1rem;
+    }
+
+    /* Mobile Responsive Design */
+    @media (max-width: 1200px) {
+        .patient-profile-container {
+            margin: 1rem;
+            padding: 1.5rem;
+        }
+        
+        .content-sections {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        body {
+            background: #f8f9fa;
+        }
+        
+        .patient-profile-container {
+            margin: 0.5rem;
+            padding: 1rem;
+            border-radius: 15px;
+        }
+        
+        .profile-header {
+            padding: 2rem 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .profile-header-content {
+            flex-direction: column;
+            text-align: center;
+            gap: 1.5rem;
+        }
+        
+        .patient-avatar {
+            width: 100px;
+            height: 100px;
+            font-size: 2.5rem;
+        }
+        
+        .patient-info h1 {
+            font-size: 2rem;
+        }
+        
+        .patient-info .subtitle {
+            font-size: 1rem;
+        }
+        
+        .patient-stats {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .stat-card {
+            padding: 1rem;
+        }
+        
+        .stat-card .icon {
+            width: 40px;
+            height: 40px;
+            font-size: 1.2rem;
+        }
+        
+        .stat-card .number {
+            font-size: 1.5rem;
+        }
+        
+        .quick-actions {
+            padding: 1.5rem;
+        }
+        
+        .quick-actions h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .action-buttons {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .action-btn {
+            padding: 0.875rem 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .patient-details {
+            padding: 1.5rem;
+        }
+        
+        .patient-details h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .details-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .section {
+            margin-bottom: 1rem;
+        }
+        
+        .section-header {
+            padding: 1rem;
+        }
+        
+        .section-header h3 {
+            font-size: 1.1rem;
+        }
+        
+        .section-content {
+            padding: 1rem;
+            max-height: 300px;
+        }
+        
+        .item-card {
+            padding: 0.875rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .item-title {
+            font-size: 0.95rem;
+        }
+        
+        .item-meta {
+            font-size: 0.8rem;
+        }
+        
+        .status-badge {
+            font-size: 0.7rem;
+            padding: 0.2rem 0.5rem;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .patient-profile-container {
+            margin: 0.25rem;
+            padding: 0.75rem;
+        }
+        
+        .profile-header {
+            padding: 1.5rem 1rem;
+        }
+        
+        .patient-avatar {
+            width: 80px;
+            height: 80px;
+            font-size: 2rem;
+        }
+        
+        .patient-info h1 {
+            font-size: 1.75rem;
+        }
+        
+        .patient-info .subtitle {
+            font-size: 0.9rem;
+        }
+        
+        .patient-stats {
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        
+        .stat-card {
+            padding: 0.875rem;
+        }
+        
+        .stat-card .icon {
+            width: 35px;
+            height: 35px;
+            font-size: 1rem;
+        }
+        
+        .stat-card .number {
+            font-size: 1.25rem;
+        }
+        
+        .stat-card .label {
+            font-size: 0.8rem;
+        }
+        
+        .quick-actions {
+            padding: 1rem;
+        }
+        
+        .action-btn {
+            padding: 0.75rem 0.875rem;
+            font-size: 0.85rem;
+        }
+        
+        .action-btn i {
+            font-size: 1rem;
+        }
+        
+        .patient-details {
+            padding: 1rem;
+        }
+        
+        .details-grid {
+            gap: 0.75rem;
+        }
+        
+        .detail-label {
+            font-size: 0.8rem;
+        }
+        
+        .detail-value {
+            font-size: 1rem;
+        }
+        
+        .section-header {
+            padding: 0.875rem;
+        }
+        
+        .section-content {
+            padding: 0.875rem;
+            max-height: 250px;
+        }
+        
+        .item-card {
+            padding: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state {
+            padding: 2rem 0.5rem;
+        }
+        
+        .empty-state i {
+            font-size: 2rem;
+        }
+    }
+    
+    /* Landscape orientation for mobile */
+    @media (max-width: 768px) and (orientation: landscape) {
+        .profile-header-content {
+            flex-direction: row;
+            text-align: left;
+        }
+        
+        .patient-stats {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .action-buttons {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+    
+    /* Extra small devices */
+    @media (max-width: 320px) {
+        .patient-profile-container {
+            margin: 0.125rem;
+            padding: 0.5rem;
+        }
+        
+        .profile-header {
+            padding: 1rem 0.75rem;
+        }
+        
+        .patient-info h1 {
+            font-size: 1.5rem;
+        }
+        
+        .patient-info .subtitle {
+            font-size: 0.8rem;
+        }
+        
+        .stat-card {
+            padding: 0.75rem;
+        }
+        
+        .action-btn {
+            padding: 0.625rem 0.75rem;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="patient-profile-container">
+    <!-- Profile Header -->
+    <div class="profile-header">
+        <div class="profile-header-content">
+            <div class="patient-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+            <div class="patient-info">
+                <h1>{% if patient.patient_name and patient.patient_name.strip %}{{ patient.patient_name }}{% else %}{{ patient.user.get_full_name }}{% endif %}</h1>
+                <p class="subtitle">
+                    <i class="fas fa-phone"></i> {{ patient.patient_id }} | 
+                    <i class="fas fa-user-md"></i> {{ patient.doctor.user.get_full_name }} | 
+                    <i class="fas fa-calendar"></i> {{ patient.age }} سنة
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Patient Statistics -->
+    <div class="patient-stats">
+        <div class="stat-card">
+            <div class="icon diseases">
+                <i class="fas fa-virus"></i>
+            </div>
+            <p class="number">{{ stats.total_diseases }}</p>
+            <p class="label">إجمالي الأمراض</p>
+            <small style="color: var(--danger-color);">{{ stats.active_diseases }} نشط</small>
+        </div>
+        
+        <div class="stat-card">
+            <div class="icon tests">
+                <i class="fas fa-flask"></i>
+            </div>
+            <p class="number">{{ stats.total_tests }}</p>
+            <p class="label">إجمالي الفحوصات</p>
+            <small style="color: var(--warning-color);">{{ stats.pending_tests }} في الانتظار</small>
+        </div>
+        
+        <div class="stat-card">
+            <div class="icon treatments">
+                <i class="fas fa-pills"></i>
+            </div>
+            <p class="number">{{ stats.total_treatments }}</p>
+            <p class="label">إجمالي العلاجات</p>
+            <small style="color: var(--secondary-color);">{{ stats.active_treatments }} نشط</small>
+        </div>
+        
+        <div class="stat-card">
+            <div class="icon surgeries">
+                <i class="fas fa-procedures"></i>
+            </div>
+            <p class="number">{{ stats.total_surgeries }}</p>
+            <p class="label">إجمالي العمليات</p>
+            <small style="color: var(--info-color);">{{ stats.upcoming_surgeries }} قادمة</small>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <h3><i class="fas fa-bolt"></i> إجراءات سريعة</h3>
+        <div class="action-buttons">
+            <a href="{{ quick_actions.add_disease }}" class="action-btn">
+                <i class="fas fa-plus-circle"></i>
+                <span>إضافة مرض</span>
+            </a>
+            <a href="{{ quick_actions.add_test }}" class="action-btn">
+                <i class="fas fa-microscope"></i>
+                <span>إضافة فحص</span>
+            </a>
+            <a href="{{ quick_actions.add_treatment }}" class="action-btn">
+                <i class="fas fa-prescription-bottle"></i>
+                <span>إضافة علاج</span>
+            </a>
+            <a href="{{ quick_actions.add_surgery }}" class="action-btn">
+                <i class="fas fa-cut"></i>
+                <span>إضافة عملية</span>
+            </a>
+            <a href="{{ quick_actions.add_visit }}" class="action-btn">
+                <i class="fas fa-calendar-check"></i>
+                <span>إضافة زيارة</span>
+            </a>
+            <a href="{{ quick_actions.edit_patient }}" class="action-btn">
+                <i class="fas fa-edit"></i>
+                <span>تعديل بيانات المريض</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Patient Details -->
+    <div class="patient-details">
+        <h3><i class="fas fa-info-circle"></i> تفاصيل المريض</h3>
+        <div class="details-grid">
+            <div class="detail-item">
+                <span class="detail-label">رقم الهاتف</span>
+                <span class="detail-value">{{ patient.patient_id }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">تاريخ الميلاد</span>
+                <span class="detail-value">{{ patient.date_of_birth }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">الجنس</span>
+                <span class="detail-value">{{ patient.get_gender_display }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">فصيلة الدم</span>
+                <span class="detail-value">{{ patient.blood_group|default:"غير محدد" }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">الطبيب المعالج</span>
+                <span class="detail-value">{{ patient.doctor.user.get_full_name }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">التخصص</span>
+                <span class="detail-value">{{ patient.doctor.get_specialization_display }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">المستشفى</span>
+                <span class="detail-value">{{ patient.doctor.center.name }}</span>
+            </div>
+            <div class="detail-item">
+                <span class="detail-label">المدينة</span>
+                <span class="detail-value">{{ patient.doctor.center.city.get_name_display }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="content-sections">
+        <!-- Diseases Section -->
+        <div class="section">
+            <div class="section-header">
+                <h3><i class="fas fa-virus"></i> الأمراض</h3>
+                <span class="status-badge status-active">{{ diseases.count }}</span>
+            </div>
+            <div class="section-content">
+                {% if diseases %}
+                    {% for disease in diseases %}
+                    <div class="item-card">
+                        <h4 class="item-title">{{ disease.disease.name }}</h4>
+                        <p class="item-meta">
+                            <i class="fas fa-calendar"></i> {{ disease.diagnosed_date }} | 
+                            <span class="status-badge status-{{ disease.status|lower }}">{{ disease.get_status_display }}</span>
+                        </p>
+                        {% if disease.notes %}
+                        <p class="item-meta">{{ disease.notes|truncatewords:20 }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-virus"></i>
+                        <p>لا توجد أمراض مسجلة</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Tests Section -->
+        <div class="section">
+            <div class="section-header">
+                <h3><i class="fas fa-flask"></i> الفحوصات</h3>
+                <span class="status-badge status-pending">{{ tests.count }}</span>
+            </div>
+            <div class="section-content">
+                {% if tests %}
+                    {% for test in tests %}
+                    <div class="item-card">
+                        <h4 class="item-title">{{ test.test_name }}</h4>
+                        <p class="item-meta">
+                            <i class="fas fa-calendar"></i> {{ test.test_date|date:"Y-m-d H:i" }} | 
+                            <span class="status-badge status-{{ test.status|lower }}">{{ test.get_status_display }}</span>
+                        </p>
+                        <p class="item-meta">
+                            <i class="fas fa-tag"></i> {{ test.get_test_type_display }} | 
+                            <i class="fas fa-disease"></i> {{ test.disease.name }}
+                        </p>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-flask"></i>
+                        <p>لا توجد فحوصات مسجلة</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Treatments Section -->
+        <div class="section">
+            <div class="section-header">
+                <h3><i class="fas fa-pills"></i> العلاجات</h3>
+                <span class="status-badge status-active">{{ treatments.count }}</span>
+            </div>
+            <div class="section-content">
+                {% if treatments %}
+                    {% for treatment in treatments %}
+                    <div class="item-card">
+                        <h4 class="item-title">{{ treatment.treatment_name }}</h4>
+                        <p class="item-meta">
+                            <i class="fas fa-calendar"></i> {{ treatment.start_date }} - {{ treatment.end_date|default:"مستمر" }} | 
+                            <span class="status-badge status-{{ treatment.status|lower }}">{{ treatment.get_status_display }}</span>
+                        </p>
+                        <p class="item-meta">
+                            <i class="fas fa-disease"></i> {{ treatment.disease.name }}
+                        </p>
+                        {% if treatment.treatment_medicines.all %}
+                        <p class="item-meta">
+                            <i class="fas fa-prescription-bottle"></i> 
+                            {% for med in treatment.treatment_medicines.all %}
+                                {{ med.medicine.name }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-pills"></i>
+                        <p>لا توجد علاجات مسجلة</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Surgeries Section -->
+        <div class="section">
+            <div class="section-header">
+                <h3><i class="fas fa-procedures"></i> العمليات</h3>
+                <span class="status-badge status-pending">{{ surgeries.count }}</span>
+            </div>
+            <div class="section-content">
+                {% if surgeries %}
+                    {% for surgery in surgeries %}
+                    <div class="item-card">
+                        <h4 class="item-title">{{ surgery.surgery_name }}</h4>
+                        <p class="item-meta">
+                            <i class="fas fa-calendar"></i> {{ surgery.scheduled_date|date:"Y-m-d H:i" }} | 
+                            <span class="status-badge status-{{ surgery.status|lower }}">{{ surgery.get_status_display }}</span>
+                        </p>
+                        <p class="item-meta">
+                            <i class="fas fa-user-md"></i> {{ surgery.surgeon_name }}
+                        </p>
+                        {% if surgery.complications != 'NONE' %}
+                        <p class="item-meta">
+                            <i class="fas fa-exclamation-triangle"></i> {{ surgery.get_complications_display }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-procedures"></i>
+                        <p>لا توجد عمليات مسجلة</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Visits Section -->
+        <div class="section">
+            <div class="section-header">
+                <h3><i class="fas fa-calendar-check"></i> الزيارات</h3>
+                <span class="status-badge status-pending">{{ visits.count }}</span>
+            </div>
+            <div class="section-content">
+                {% if visits %}
+                    {% for visit in visits %}
+                    <div class="item-card">
+                        <h4 class="item-title">{{ visit.get_visit_type_display }}</h4>
+                        <p class="item-meta">
+                            <i class="fas fa-calendar"></i> {{ visit.visit_date|date:"Y-m-d H:i" }} | 
+                            <span class="status-badge status-{{ visit.status|lower }}">{{ visit.get_status_display }}</span>
+                        </p>
+                        <p class="item-meta">
+                            <i class="fas fa-user-md"></i> {{ visit.doctor.user.get_full_name }} | 
+                            <i class="fas fa-stethoscope"></i> {{ visit.chief_complaint|truncatewords:10 }}
+                        </p>
+                        {% if visit.diagnosis %}
+                        <p class="item-meta">
+                            <i class="fas fa-diagnoses"></i> {{ visit.diagnosis|truncatewords:15 }}
+                        </p>
+                        {% endif %}
+                        {% if visit.follow_up_date %}
+                        <p class="item-meta">
+                            <i class="fas fa-calendar-plus"></i> متابعة: {{ visit.follow_up_date|date:"Y-m-d H:i" }}
+                        </p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">
+                        <i class="fas fa-calendar-check"></i>
+                        <p>لا توجد زيارات مسجلة</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

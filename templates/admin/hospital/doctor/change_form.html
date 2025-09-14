@@ -1,0 +1,433 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<style>
+    /* Fix select box text visibility - Same solution as patient form */
+    select {
+        color: #000 !important;
+        background-color: #fff !important;
+        background: #fff !important;
+    }
+    
+    select option {
+        color: #000 !important;
+        background-color: #fff !important;
+        background: #fff !important;
+    }
+    
+    /* Ensure selected text is visible */
+    select:focus {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    select option:checked {
+        color: #000 !important;
+        background-color: #e9ecef !important;
+    }
+    
+    /* Target specific select fields */
+    #id_user, #id_center, #id_specialization, #id_license_number, #id_experience_years, #id_is_available {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    #id_user option, #id_center option, #id_specialization option {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Override any conflicting styles */
+    .form-row select, .field-user select, .field-center select {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Force visibility for selected text */
+    select option:selected {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Override any admin CSS that might be hiding text */
+    .admin-interface select,
+    .admin-interface select option,
+    .admin-interface select option:selected {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Ensure text is visible in all states */
+    select:not(:focus) {
+        color: #000 !important;
+    }
+    
+    select:focus {
+        color: #000 !important;
+    }
+    
+    /* Fix select box appearance and text visibility */
+    select {
+        border: 1px solid #dee2e6 !important;
+        border-radius: 4px !important;
+        /* Force native appearance to ensure text visibility */
+        appearance: auto !important;
+        -webkit-appearance: auto !important;
+        -moz-appearance: auto !important;
+        /* Remove custom background image that might be covering text */
+        background-image: none !important;
+        /* Better padding for text positioning */
+        padding: 8px 12px !important;
+        padding-right: 30px !important;
+        /* Ensure text is visible and properly positioned */
+        color: #000 !important;
+        background-color: #fff !important;
+        /* Better text alignment */
+        text-align: right !important;
+        line-height: 1.5 !important;
+        /* Ensure proper height */
+        height: auto !important;
+        min-height: 38px !important;
+    }
+    
+    select option {
+        padding: 8px 12px !important;
+        color: #000 !important;
+        background-color: #fff !important;
+        text-align: right !important;
+        line-height: 1.5 !important;
+    }
+    
+    /* Override any conflicting admin CSS */
+    .admin-interface select,
+    .admin-interface select:focus,
+    .admin-interface select:not(:focus) {
+        appearance: auto !important;
+        -webkit-appearance: auto !important;
+        -moz-appearance: auto !important;
+        background-image: none !important;
+        padding-right: 8px !important;
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Force text visibility for all select states */
+    select:focus,
+    select:not(:focus),
+    select:hover,
+    select:active {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Additional CSS to ensure selected text is always visible */
+    select option:selected {
+        color: #000 !important;
+        background-color: #e9ecef !important;
+        font-weight: 600 !important;
+    }
+    
+    /* Force visibility for the select element itself */
+    select {
+        color: #000 !important;
+        background-color: #fff !important;
+        background: #fff !important;
+    }
+    
+    /* Ensure the select shows the selected text */
+    select:focus {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Override any potential hiding styles */
+    select, select *, select option, select option:selected {
+        color: #000 !important;
+        background-color: #fff !important;
+    }
+    
+    /* Additional styling for form fields */
+    .form-row {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
+        border-radius: 0.75rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    /* Better text positioning for select boxes */
+    .form-row select {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: flex-end !important;
+        text-align: right !important;
+        direction: rtl !important;
+    }
+    
+    /* Ensure proper text alignment for Arabic text */
+    .form-row select option {
+        text-align: right !important;
+        direction: rtl !important;
+    }
+    
+    .form-row:hover {
+        background: white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+    
+    .form-row label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 0.875rem;
+        padding-right: 0.5rem;
+    }
+    
+    /* Input field styling */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    input[type="datetime-local"],
+    textarea {
+        color: #000 !important;
+        background-color: #fff !important;
+        border: 2px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="datetime-local"]:focus,
+    textarea:focus {
+        border-color: #3b82f6 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Checkbox styling */
+    input[type="checkbox"] {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        accent-color: #3b82f6 !important;
+    }
+    
+    /* Additional select box text positioning fixes */
+    select {
+        vertical-align: middle !important;
+        display: inline-block !important;
+    }
+    
+    /* Ensure text is properly centered vertically */
+    select option {
+        vertical-align: middle !important;
+        display: block !important;
+    }
+    
+    /* Fix for Arabic text direction */
+    .form-row select {
+        unicode-bidi: bidi-override !important;
+        direction: rtl !important;
+    }
+</style>
+<script>
+$(document).ready(function() {
+    // Force native appearance and proper styling for all select elements
+    $('select').css({
+        'color': '#000',
+        'background-color': '#fff',
+        'background': '#fff',
+        'appearance': 'auto',
+        '-webkit-appearance': 'auto',
+        '-moz-appearance': 'auto',
+        'background-image': 'none',
+        'padding': '8px 12px',
+        'padding-right': '30px',
+        'text-align': 'right',
+        'line-height': '1.5',
+        'height': 'auto',
+        'min-height': '38px'
+    });
+    
+    $('select option').css({
+        'color': '#000',
+        'background-color': '#fff',
+        'background': '#fff',
+        'text-align': 'right',
+        'line-height': '1.5',
+        'padding': '8px 12px'
+    });
+    
+    // Force text visibility on change with detailed debugging
+    $('select').on('change', function() {
+        var $this = $(this);
+        var selectedValue = $this.val();
+        var selectedText = $this.find('option:selected').text();
+        var selectedOption = $this.find('option:selected');
+        
+        // Apply styling
+        $this.css({
+            'color': '#000',
+            'background-color': '#fff',
+            'appearance': 'auto',
+            '-webkit-appearance': 'auto',
+            '-moz-appearance': 'auto',
+            'background-image': 'none',
+            'padding': '8px 12px',
+            'padding-right': '30px',
+            'text-align': 'right',
+            'line-height': '1.5',
+            'height': 'auto',
+            'min-height': '38px'
+        });
+        
+        // Detailed debugging
+        console.log('=== DOCTOR SELECT CHANGE DEBUG ===');
+        console.log('Element ID:', this.id);
+        console.log('Selected value:', selectedValue);
+        console.log('Selected text:', selectedText);
+        console.log('Selected option element:', selectedOption[0]);
+        console.log('Element computed styles:');
+        console.log('  - color:', window.getComputedStyle(this).color);
+        console.log('  - background-color:', window.getComputedStyle(this).backgroundColor);
+        console.log('  - appearance:', window.getComputedStyle(this).appearance);
+        console.log('  - display:', window.getComputedStyle(this).display);
+        console.log('  - visibility:', window.getComputedStyle(this).visibility);
+        console.log('  - opacity:', window.getComputedStyle(this).opacity);
+        console.log('Element innerHTML:', this.innerHTML);
+        console.log('Element value:', this.value);
+        console.log('Element textContent:', this.textContent);
+        console.log('========================');
+        
+        // Special handling for specialization field
+        if (this.id === 'id_specialization') {
+            console.log('Specialization field changed to:', selectedText);
+        }
+        
+        // Simple approach - just force styling
+        $this.css({
+            'color': '#000 !important',
+            'background-color': '#fff !important'
+        });
+        
+        console.log('Applied styling to show selected text');
+    });
+    
+    // Force text visibility on focus
+    $('select').on('focus', function() {
+        $(this).css({
+            'color': '#000',
+            'background-color': '#fff',
+            'appearance': 'auto',
+            '-webkit-appearance': 'auto',
+            '-moz-appearance': 'auto',
+            'background-image': 'none',
+            'padding': '8px 12px',
+            'padding-right': '30px',
+            'text-align': 'right',
+            'line-height': '1.5',
+            'height': 'auto',
+            'min-height': '38px'
+        });
+    });
+    
+    // Create visual indicators for selected values (DISABLED to prevent duplication)
+    function createSelectionIndicator() {
+        // This function is disabled to prevent text duplication
+        // The select box itself will show the selected text
+        return;
+    }
+    
+    // Enhanced function to ensure selected text is always visible
+    function ensureSelectedTextVisible() {
+        $('select').each(function() {
+            var $this = $(this);
+            var selectedValue = $this.val();
+            var selectedText = $this.find('option:selected').text();
+            
+            // Force the select to show the selected text
+            $this.css({
+                'color': '#000 !important',
+                'background-color': '#fff !important',
+                'background': '#fff !important',
+                'appearance': 'auto !important',
+                '-webkit-appearance': 'auto !important',
+                '-moz-appearance': 'auto !important',
+                'background-image': 'none !important',
+                'padding': '8px 12px !important',
+                'padding-right': '30px !important',
+                'text-align': 'right !important',
+                'line-height': '1.5 !important',
+                'height': 'auto !important',
+                'min-height': '38px !important'
+            });
+            
+            // Force all options to have proper styling
+            $this.find('option').css({
+                'color': '#000 !important',
+                'background-color': '#fff !important',
+                'background': '#fff !important',
+                'text-align': 'right !important',
+                'line-height': '1.5 !important',
+                'padding': '8px 12px !important'
+            });
+            
+            // Force selected option styling
+            $this.find('option:selected').css({
+                'color': '#000 !important',
+                'background-color': '#e9ecef !important'
+            });
+            
+            console.log('Ensured visibility for', this.id, ':', selectedText);
+        });
+    }
+    
+    // Remove any existing selection indicators to prevent duplication
+    $('.selection-indicator').remove();
+    
+    // Call functions on page load and after changes
+    ensureSelectedTextVisible();
+    
+    // Update indicators when selections change (with debouncing)
+    var indicatorTimeout;
+    $('select').on('change', function() {
+        clearTimeout(indicatorTimeout);
+        indicatorTimeout = setTimeout(function() {
+            ensureSelectedTextVisible();
+        }, 200);
+    });
+    
+    // Also call on focus to ensure visibility
+    $('select').on('focus', function() {
+        ensureSelectedTextVisible();
+    });
+    
+    // Periodic cleanup to remove any duplicated text indicators
+    setInterval(function() {
+        $('.selection-indicator').remove();
+    }, 1000);
+    
+    console.log('Doctor form select box fixes applied');
+});
+</script>
+{% endblock %}
+
+{% block field_sets %}
+    {{ block.super }}
+{% endblock %}

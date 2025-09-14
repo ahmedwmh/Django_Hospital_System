@@ -1,0 +1,579 @@
+{% extends "admin/change_form.html" %}
+{% load i18n admin_urls static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<!-- Visit Form JavaScript for cascading dropdowns -->
+<script src="{% static 'admin/js/visit_form.js' %}"></script>
+<style>
+    /* Universal form styling for all admin forms */
+    .form-row {
+        margin-bottom: 1.5rem;
+        padding: 1rem;
+        background: linear-gradient(135deg, #f8f9fa 0%, white 100%);
+        border-radius: 0.75rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        position: relative;
+    }
+    
+    .form-row:hover {
+        background: white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-color: #3b82f6;
+    }
+    
+    .form-row label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 700;
+        color: #1f2937;
+        font-size: 0.875rem;
+        padding-right: 0.5rem;
+    }
+    
+    /* Universal select box styling - Enhanced version */
+    select {
+        color: #000 !important;
+        background-color: #fff !important;
+        background: #fff !important;
+        border: 1px solid #dee2e6 !important;
+        border-radius: 4px !important;
+        /* Better padding for text positioning */
+        padding: 8px 12px !important;
+        padding-right: 30px !important;
+        /* Ensure text is visible and properly positioned */
+        color: #000 !important;
+        background-color: #fff !important;
+        /* Better text alignment */
+        text-align: right !important;
+        line-height: 1.5 !important;
+        /* Ensure proper height */
+        height: auto !important;
+        min-height: 38px !important;
+        /* Force native appearance to ensure text visibility */
+        appearance: auto !important;
+        -webkit-appearance: auto !important;
+        -moz-appearance: auto !important;
+        /* Remove custom background image that might be covering text */
+        background-image: none !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        max-width: 300px !important;
+    }
+    
+    select:focus {
+        border-color: #3b82f6 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    select option {
+        color: #000 !important;
+        background-color: #fff !important;
+        text-align: right !important;
+        line-height: 1.5 !important;
+        padding: 8px 12px !important;
+    }
+    
+    select option:checked {
+        color: #000 !important;
+        background-color: #e5e7eb !important;
+    }
+    
+    /* Input field styling */
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    input[type="datetime-local"],
+    textarea {
+        color: #000 !important;
+        background-color: #fff !important;
+        border: 2px solid #d1d5db !important;
+        border-radius: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+        font-size: 1rem !important;
+        transition: all 0.3s ease !important;
+        width: 100% !important;
+    }
+    
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    input[type="password"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    input[type="datetime-local"]:focus,
+    textarea:focus {
+        border-color: #3b82f6 !important;
+        outline: none !important;
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+        transform: translateY(-1px) !important;
+    }
+    
+    /* Checkbox styling */
+    input[type="checkbox"] {
+        width: 1.25rem !important;
+        height: 1.25rem !important;
+        accent-color: #3b82f6 !important;
+    }
+    
+    /* Help text styling */
+    .help {
+        color: #6b7280 !important;
+        font-size: 0.875rem !important;
+        margin-top: 0.25rem !important;
+    }
+    
+    /* Error styling */
+    .errorlist {
+        color: #dc2626 !important;
+        background: #fef2f2 !important;
+        border: 1px solid #fecaca !important;
+        border-radius: 0.5rem !important;
+        padding: 0.75rem 1rem !important;
+        margin: 0.5rem 0 !important;
+        list-style: none !important;
+    }
+    
+    .errorlist li {
+        color: #dc2626 !important;
+        font-size: 0.875rem !important;
+        margin: 0 !important;
+    }
+    
+    /* Fieldset styling */
+    .form-row fieldset {
+        border: 1px solid #e5e7eb !important;
+        border-radius: 0.5rem !important;
+        padding: 1rem !important;
+        margin: 0.5rem 0 !important;
+    }
+    
+    .form-row fieldset legend {
+        color: #374151 !important;
+        font-weight: 600 !important;
+        font-size: 0.875rem !important;
+        padding: 0 0.5rem !important;
+    }
+    
+    /* Responsive design */
+    @media (max-width: 768px) {
+        .form-row {
+            padding: 0.75rem;
+        }
+        
+        select,
+        input[type="text"],
+        input[type="email"],
+        input[type="password"],
+        input[type="number"],
+        input[type="date"],
+        input[type="datetime-local"],
+        textarea {
+            font-size: 0.875rem !important;
+            padding: 0.5rem 0.75rem !important;
+        }
+        
+        select {
+            max-width: 100% !important;
+        }
+    }
+</style>
+<script>
+// Global functions for patient form filtering - Enhanced version with proper state management
+function filterCenters() {
+    var cityId = $('#id_city').val();
+    var centerSelect = $('#id_center');
+    
+    console.log('Filtering centers for city:', cityId);
+    
+    if (cityId) {
+        // Enable center selection and clear any previous selection
+        centerSelect.prop('disabled', false);
+        centerSelect.removeClass('error');
+        console.log('Centers enabled for city selection');
+    } else {
+        // Disable center selection and clear value
+        centerSelect.prop('disabled', true);
+        centerSelect.val('');
+        centerSelect.removeClass('error');
+        console.log('Centers disabled - no city selected');
+    }
+}
+
+function filterDoctors() {
+    var centerId = $('#id_center').val();
+    var doctorSelect = $('#id_doctor');
+    
+    console.log('Filtering doctors for center:', centerId);
+    
+    if (centerId) {
+        // Enable doctor selection and clear any previous selection
+        doctorSelect.prop('disabled', false);
+        doctorSelect.removeClass('error');
+        console.log('Doctors enabled for center selection');
+    } else {
+        // Disable doctor selection and clear value
+        doctorSelect.prop('disabled', true);
+        doctorSelect.val('');
+        doctorSelect.removeClass('error');
+        console.log('Doctors disabled - no center selected');
+    }
+}
+
+function updateDoctorInfo() {
+    var doctorId = $('#id_doctor').val();
+    console.log('Doctor selected:', doctorId);
+    
+    if (doctorId) {
+        console.log('Doctor info updated for ID:', doctorId);
+    }
+}
+
+// Function to re-enable all select boxes after form validation errors
+function reEnableSelectBoxes() {
+    var cityId = $('#id_city').length ? $('#id_city').val() : null;
+    var centerId = $('#id_center').length ? $('#id_center').val() : null;
+    
+    console.log('Re-enabling select boxes. City:', cityId, 'Center:', centerId);
+    
+    // Always enable city selection if field exists
+    if ($('#id_city').length) {
+        $('#id_city').prop('disabled', false);
+        $('#id_city').removeClass('error');
+    }
+    
+    // Enable center if city is selected and center field exists
+    if ($('#id_center').length) {
+        if (cityId) {
+            $('#id_center').prop('disabled', false);
+            $('#id_center').removeClass('error');
+            console.log('Center enabled because city is selected');
+        } else {
+            $('#id_center').prop('disabled', true);
+            $('#id_center').val('');
+            console.log('Center disabled because no city selected');
+        }
+    }
+    
+    // Enable doctor if center is selected and doctor field exists
+    if ($('#id_doctor').length) {
+        if (centerId) {
+            $('#id_doctor').prop('disabled', false);
+            $('#id_doctor').removeClass('error');
+            console.log('Doctor enabled because center is selected');
+        } else {
+            $('#id_doctor').prop('disabled', true);
+            $('#id_doctor').val('');
+            console.log('Doctor disabled because no center selected');
+        }
+    }
+    
+    console.log('Select boxes re-enabled after validation error');
+}
+
+$(document).ready(function() {
+    // Universal form enhancements
+    console.log('Universal form template loaded');
+    
+    // Force proper styling for all select elements - Enhanced version
+    $('select').each(function() {
+        $(this).css({
+            'color': '#000',
+            'background-color': '#fff',
+            'background': '#fff',
+            'appearance': 'auto',
+            '-webkit-appearance': 'auto',
+            '-moz-appearance': 'auto',
+            'background-image': 'none',
+            'padding': '8px 12px',
+            'padding-right': '30px',
+            'text-align': 'right',
+            'line-height': '1.5',
+            'height': 'auto',
+            'min-height': '38px',
+            'max-width': '300px'
+        });
+    });
+    
+    $('select option').css({
+        'color': '#000',
+        'background-color': '#fff',
+        'background': '#fff',
+        'text-align': 'right',
+        'line-height': '1.5',
+        'padding': '8px 12px'
+    });
+    
+    // Force proper styling for all input elements
+    $('input[type="text"], input[type="email"], input[type="password"], input[type="number"], input[type="date"], input[type="datetime-local"], textarea').each(function() {
+        $(this).css({
+            'color': '#000',
+            'background-color': '#fff',
+            'border': '2px solid #d1d5db',
+            'border-radius': '0.5rem',
+            'padding': '0.75rem 1rem',
+            'font-size': '1rem',
+            'transition': 'all 0.3s ease',
+            'width': '100%'
+        });
+    });
+    
+    // Enhanced select box change handler
+    $('select').on('change', function() {
+        var $this = $(this);
+        var selectedValue = $this.val();
+        var selectedText = $this.find('option:selected').text();
+        
+        // Apply enhanced styling
+        $this.css({
+            'color': '#000',
+            'background-color': '#fff',
+            'appearance': 'auto',
+            '-webkit-appearance': 'auto',
+            '-moz-appearance': 'auto',
+            'background-image': 'none',
+            'padding': '8px 12px',
+            'padding-right': '30px',
+            'text-align': 'right',
+            'line-height': '1.5',
+            'height': 'auto',
+            'min-height': '38px'
+        });
+        
+        console.log('Select changed:', this.id, 'to:', selectedText);
+    });
+    
+    // Add focus effects
+    $('select, input, textarea').on('focus', function() {
+        $(this).css({
+            'border-color': '#3b82f6',
+            'box-shadow': '0 0 0 3px rgba(59, 130, 246, 0.1)',
+            'transform': 'translateY(-1px)'
+        });
+        
+        // Enhanced select box focus styling
+        if ($(this).is('select')) {
+            $(this).css({
+                'color': '#000',
+                'background-color': '#fff',
+                'appearance': 'auto',
+                '-webkit-appearance': 'auto',
+                '-moz-appearance': 'auto',
+                'background-image': 'none',
+                'padding': '8px 12px',
+                'padding-right': '30px',
+                'text-align': 'right',
+                'line-height': '1.5',
+                'height': 'auto',
+                'min-height': '38px'
+            });
+        }
+    });
+    
+    // Remove focus effects
+    $('select, input, textarea').on('blur', function() {
+        $(this).css({
+            'border-color': '#d1d5db',
+            'box-shadow': 'none',
+            'transform': 'translateY(0)'
+        });
+    });
+    
+    // Enhanced phone number validation for patient_id field
+    if ($('#id_patient_id').length) {
+        function validatePhoneNumber(phone) {
+            var phoneRegex = /^0[17][0-9]{9}$/;
+            return phoneRegex.test(phone);
+        }
+        
+        function showPhoneValidationMessage(message, isError = true) {
+            var existingMsg = $('#phone-validation-message');
+            if (existingMsg.length) {
+                existingMsg.remove();
+            }
+            
+            var messageClass = isError ? 'error' : 'success';
+            var icon = isError ? '❌' : '✅';
+            var messageHtml = '<div id="phone-validation-message" class="' + messageClass + '" style="margin-top: 5px; padding: 5px 10px; border-radius: 4px; font-size: 12px; ' + 
+                             (isError ? 'background-color: #fee2e2; color: #991b1b; border: 1px solid #fecaca;' : 'background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0;') + '">' +
+                             icon + ' ' + message + '</div>';
+            
+            $('#id_patient_id').parent().append(messageHtml);
+        }
+        
+        function checkPhoneUniqueness(phone) {
+            if (phone.length === 11 && validatePhoneNumber(phone)) {
+                $.ajax({
+                    url: '/api/v1/patients/check-phone-uniqueness/',
+                    method: 'GET',
+                    data: { 'phone': phone },
+                    success: function(response) {
+                        if (response.exists) {
+                            showPhoneValidationMessage('رقم الهاتف هذا مستخدم بالفعل لمريض آخر', true);
+                            $('#id_patient_id').addClass('error');
+                        } else {
+                            showPhoneValidationMessage('رقم الهاتف صحيح ومتاح', false);
+                            $('#id_patient_id').removeClass('error');
+                        }
+                    },
+                    error: function() {
+                        if (validatePhoneNumber(phone)) {
+                            showPhoneValidationMessage('رقم الهاتف صحيح', false);
+                            $('#id_patient_id').removeClass('error');
+                        }
+                    }
+                });
+            }
+        }
+        
+        $('#id_patient_id').on('input', function() {
+            var phone = this.value;
+            
+            // Remove any non-numeric characters
+            this.value = phone.replace(/[^0-9]/g, '');
+            phone = this.value;
+            
+            // Limit to 11 digits
+            if (phone.length > 11) {
+                this.value = phone.slice(0, 11);
+                phone = this.value;
+            }
+            
+            // Clear previous validation messages
+            $('#phone-validation-message').remove();
+            $('#id_patient_id').removeClass('error');
+            
+            // Real-time validation
+            if (phone.length > 0) {
+                if (phone.length < 11) {
+                    showPhoneValidationMessage('رقم الهاتف يجب أن يكون 11 رقماً', true);
+                    $('#id_patient_id').addClass('error');
+                } else if (!validatePhoneNumber(phone)) {
+                    showPhoneValidationMessage('رقم الهاتف يجب أن يبدأ بـ 07 أو 01', true);
+                    $('#id_patient_id').addClass('error');
+                } else {
+                    // Check uniqueness with debounce
+                    clearTimeout(window.phoneCheckTimeout);
+                    window.phoneCheckTimeout = setTimeout(function() {
+                        checkPhoneUniqueness(phone);
+                    }, 500);
+                }
+            }
+        });
+        
+        // Prevent non-numeric input on keypress
+        $('#id_patient_id').on('keypress', function(e) {
+            // Allow: backspace, delete, tab, escape, enter
+            if ([8, 9, 27, 13, 46].indexOf(e.keyCode) !== -1 ||
+                // Allow: Ctrl+A, Ctrl+C, Ctrl+V, Ctrl+X
+                (e.keyCode === 65 && e.ctrlKey === true) ||
+                (e.keyCode === 67 && e.ctrlKey === true) ||
+                (e.keyCode === 86 && e.ctrlKey === true) ||
+                (e.keyCode === 88 && e.ctrlKey === true)) {
+                return;
+            }
+            // Ensure that it is a number and stop the keypress
+            if ((e.shiftKey || (e.keyCode < 48 || e.keyCode > 57)) && (e.keyCode < 96 || e.keyCode > 105)) {
+                e.preventDefault();
+            }
+        });
+    }
+    
+    // Add CSS for error state
+    $('<style>')
+        .prop('type', 'text/css')
+        .html('#id_patient_id.error { border-color: #ef4444 !important; box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important; }')
+        .appendTo('head');
+    
+    // Initialize form state
+    $('#id_center').prop('disabled', true);
+    $('#id_doctor').prop('disabled', true);
+    
+    // Bind the functions to the select elements
+    $('#id_city').on('change', function() {
+        filterCenters();
+    });
+    $('#id_center').on('change', function() {
+        filterDoctors();
+    });
+    $('#id_doctor').on('change', function() {
+        updateDoctorInfo();
+    });
+    
+    // Re-enable select boxes after form submission (in case of validation errors)
+    $('form').on('submit', function(e) {
+        console.log('=== FORM SUBMISSION DEBUG ===');
+        console.log('Form submission started');
+        console.log('City value:', $('#id_city').val());
+        console.log('Center value:', $('#id_center').val());
+        console.log('Doctor value:', $('#id_doctor').val());
+        console.log('Patient name value:', $('#id_patient_name').val());
+        console.log('Phone value:', $('#id_patient_id').val());
+        console.log('Date of birth value:', $('#id_date_of_birth').val());
+        
+        // Check all form fields
+        console.log('All form fields:');
+        $('form input, form select, form textarea').each(function() {
+            var field = $(this);
+            var name = field.attr('name');
+            var value = field.val();
+            var type = field.attr('type') || field.prop('tagName').toLowerCase();
+            console.log('  ' + name + ' (' + type + '): ' + value);
+        });
+        
+        // Ensure all values are properly set before submission
+        var cityId = $('#id_city').val();
+        var centerId = $('#id_center').val();
+        var doctorId = $('#id_doctor').val();
+        
+        if (cityId && centerId && !doctorId) {
+            console.log('City and center selected but no doctor - this should auto-assign');
+        }
+        
+        // Small delay to allow form processing
+        setTimeout(function() {
+            reEnableSelectBoxes();
+        }, 100);
+    });
+    
+    // Re-enable select boxes when any field changes (for immediate feedback)
+    $('select').on('change', function() {
+        setTimeout(function() {
+            reEnableSelectBoxes();
+        }, 50);
+    });
+    
+    // Re-enable select boxes when page loads (in case of validation errors)
+    setTimeout(function() {
+        reEnableSelectBoxes();
+    }, 500);
+    
+    // Additional re-enabling attempts to handle form state issues
+    setTimeout(function() {
+        reEnableSelectBoxes();
+    }, 1000);
+    
+    setTimeout(function() {
+        reEnableSelectBoxes();
+    }, 2000);
+    
+    // Re-enable on window focus (in case user switches tabs)
+    $(window).on('focus', function() {
+        setTimeout(function() {
+            reEnableSelectBoxes();
+        }, 100);
+    });
+    
+    console.log('Universal form enhancements applied');
+});
+</script>
+{% endblock %}
+
+{% block field_sets %}
+    {{ block.super }}
+{% endblock %}

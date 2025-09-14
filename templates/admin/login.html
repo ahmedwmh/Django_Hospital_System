@@ -1,0 +1,489 @@
+{% extends "admin/base.html" %}
+{% load i18n static %}
+
+{% block title %}{% trans 'تسجيل الدخول' %} | {% trans 'نظام إدارة المستشفى' %}{% endblock %}
+
+{% block branding %}
+<h1 id="site-name">
+    <a href="{% url 'admin:index' %}">
+        <span class="brand-icon">🏥</span>
+        {% trans 'نظام إدارة المستشفى' %}
+    </a>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card">
+        <div class="login-header">
+            <div class="hospital-icon">🏥</div>
+            <h2 class="login-title">{% trans 'تسجيل الدخول' %}</h2>
+            <p class="login-subtitle">{% trans 'مرحباً بك في نظام إدارة المستشفى' %}</p>
+        </div>
+        
+        <form action="{{ app_path }}" method="post" id="login-form" class="login-form">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+                <div class="error-messages">
+                    {% for error in form.non_field_errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+            
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}" class="form-label">
+                    <span class="label-icon">👤</span>
+                    {% trans 'اسم المستخدم' %}
+                </label>
+                {{ form.username }}
+                {% if form.username.errors %}
+                    <div class="field-errors">
+                        {% for error in form.username.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}" class="form-label">
+                    <span class="label-icon">🔒</span>
+                    {% trans 'كلمة المرور' %}
+                </label>
+                {{ form.password }}
+                {% if form.password.errors %}
+                    <div class="field-errors">
+                        {% for error in form.password.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            
+            {% if form.captcha %}
+            <div class="form-group">
+                <label for="{{ form.captcha.id_for_label }}" class="form-label">
+                    <span class="label-icon">🛡️</span>
+                    {% trans 'التحقق الأمني' %}
+                </label>
+                {{ form.captcha }}
+                {% if form.captcha.errors %}
+                    <div class="field-errors">
+                        {% for error in form.captcha.errors %}
+                            <span class="field-error">{{ error }}</span>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <div class="form-options">
+                <label class="remember-me">
+                    <input type="checkbox" name="remember_me" id="remember_me">
+                    <span class="checkmark"></span>
+                    {% trans 'تذكرني' %}
+                </label>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="login-button">
+                    <span class="button-icon">🚀</span>
+                    {% trans 'تسجيل الدخول' %}
+                </button>
+            </div>
+        </form>
+        
+	        <div class="login-footer">
+	            <div class="help-links">
+	                <a href="/" class="help-link">
+	                    <span class="link-icon">🏠</span>
+	                    {% trans 'العودة للموقع الرئيسي' %}
+	                </a>
+	                <a href="mailto:admin@hospital.com" class="help-link">
+	                    <span class="link-icon">📧</span>
+	                    {% trans 'اتصل بالدعم الفني' %}
+	                </a>
+	            </div>
+	        </div>
+    </div>
+    
+</div>
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Enhanced Login Page Design */
+    body {
+        background: linear-gradient(135deg, #667eea 0%, #4facfe 100%);
+        height: 100vh;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    body::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(102, 126, 234, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(79, 172, 254, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    #header {
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding: 15px 0;
+    }
+    
+    #site-name a {
+        color: white;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1.3em;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .brand-icon {
+        margin-left: 8px;
+        font-size: 1.2em;
+    }
+    
+    .login-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: calc(100vh - 80px);
+        padding: 20px;
+        gap: 60px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .login-card {
+        background: white;
+        border-radius: 24px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        padding: 50px;
+        width: 100%;
+        max-width: 480px;
+        position: relative;
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .login-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 6px;
+        background: linear-gradient(90deg, #667eea, #4facfe);
+        border-radius: 24px 24px 0 0;
+    }
+    
+    
+    .login-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    
+    .hospital-icon {
+        font-size: 3em;
+        margin-bottom: 15px;
+        animation: pulse 2s infinite;
+    }
+    
+    .login-title {
+        color: #333;
+        font-size: 1.8em;
+        font-weight: 700;
+        margin: 0 0 10px 0;
+    }
+    
+    .login-subtitle {
+        color: #666;
+        font-size: 1em;
+        margin: 0;
+    }
+    
+    .login-form {
+        margin-bottom: 20px;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #333;
+        font-size: 0.95em;
+    }
+    
+    .label-icon {
+        margin-left: 8px;
+        font-size: 1.1em;
+    }
+    
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group input[type="email"] {
+        width: 100%;
+        padding: 18px 24px;
+        border: 2px solid #e1e5e9;
+        border-radius: 16px;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-sizing: border-box;
+        background: #f8f9fa;
+        color: #000 !important;
+        font-weight: 500;
+    }
+    
+    .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+        color: #000 !important;
+    }
+    
+    .form-group input::placeholder {
+        color: #999 !important;
+        font-weight: 400;
+    }
+    
+    /* Ensure all input text is black */
+    .form-group input[type="text"],
+    .form-group input[type="password"],
+    .form-group input[type="email"],
+    .form-group input[type="text"]:focus,
+    .form-group input[type="password"]:focus,
+    .form-group input[type="email"]:focus {
+        color: #000 !important;
+        -webkit-text-fill-color: #000 !important;
+    }
+    
+    /* Modern form styling */
+    .form-group {
+        position: relative;
+    }
+    
+    .form-group input {
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .form-group input:not(:placeholder-shown) {
+        background: white !important;
+        border-color: #667eea !important;
+    }
+    
+    .form-options {
+        margin-bottom: 25px;
+    }
+    
+    .remember-me {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        font-size: 0.9em;
+        color: #666;
+    }
+    
+    .remember-me input[type="checkbox"] {
+        display: none;
+    }
+    
+    .checkmark {
+        width: 20px;
+        height: 20px;
+        border: 2px solid #e1e5e9;
+        border-radius: 4px;
+        margin-left: 10px;
+        position: relative;
+        transition: all 0.3s ease;
+    }
+    
+    .remember-me input:checked + .checkmark {
+        background: #667eea;
+        border-color: #667eea;
+    }
+    
+    .remember-me input:checked + .checkmark::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+    }
+    
+    .form-actions {
+        text-align: center;
+    }
+    
+    .login-button {
+        background: linear-gradient(135deg, #667eea 0%, #4facfe 100%);
+        color: white;
+        border: none;
+        padding: 18px 50px;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+        letter-spacing: 0.5px;
+    }
+    
+    .login-button:hover {
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+    
+    .login-button:active {
+        transform: translateY(1px);
+    }
+    
+    .button-icon {
+        margin-left: 8px;
+        font-size: 1.1em;
+    }
+    
+    .login-footer {
+        text-align: center;
+        border-top: 1px solid #e1e5e9;
+        padding-top: 20px;
+    }
+    
+    .help-links {
+        display: flex;
+        justify-content: space-between;
+        gap: 15px;
+    }
+    
+    .help-link {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.9em;
+        font-weight: 500;
+        transition: color 0.3s ease;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    
+    .help-link:hover {
+        color: #4facfe;
+    }
+    
+    .link-icon {
+        font-size: 0.9em;
+    }
+    
+    
+    .error-messages {
+        background: #fee;
+        border: 1px solid #fcc;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .error-message {
+        color: #c33;
+        font-size: 0.9em;
+        margin-bottom: 5px;
+    }
+    
+    .field-errors {
+        margin-top: 5px;
+    }
+    
+    .field-error {
+        color: #c33;
+        font-size: 0.8em;
+        display: block;
+    }
+    
+    /* Animations */
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+        .login-container {
+            flex-direction: column;
+            gap: 30px;
+        }
+    }
+    
+    @media (max-width: 768px) {
+        .login-container {
+            padding: 15px;
+            gap: 20px;
+        }
+        
+        .login-card {
+            padding: 35px 25px;
+            max-width: 100%;
+        }
+        
+        .help-links {
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="email"] {
+            padding: 16px 20px;
+            font-size: 16px;
+        }
+        
+        .login-button {
+            padding: 16px 40px;
+            font-size: 15px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .login-card {
+            padding: 25px 20px;
+            border-radius: 20px;
+        }
+        
+        .login-title {
+            font-size: 1.6em;
+        }
+        
+        .hospital-icon {
+            font-size: 2.5em;
+        }
+    }
+</style>
+{% endblock %}

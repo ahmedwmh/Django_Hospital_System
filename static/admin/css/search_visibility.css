@@ -1,0 +1,196 @@
+/* Ultimate Search and Filter Visibility Fix */
+
+/* Force all search elements to be visible with maximum specificity */
+#changelist-filter,
+#changelist-search,
+#searchbar,
+.changelist-search-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+    margin-bottom: var(--space-6) !important;
+    padding: var(--space-6) !important;
+    border-radius: var(--radius-xl) !important;
+}
+
+/* Ultimate search input fix for all admin pages */
+#changelist-search {
+    background: white !important;
+    border: 3px solid var(--primary-500) !important;
+    color: var(--gray-800) !important;
+    font-weight: 600 !important;
+    font-size: var(--text-lg) !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: var(--shadow-lg) !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 500px !important;
+}
+
+/* Force all search elements to be visible with maximum specificity */
+* #changelist-filter,
+* #changelist-search,
+* #searchbar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+
+/* Override any hidden states */
+#changelist-filter.hidden,
+#changelist-search.hidden,
+#searchbar.hidden {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Force visibility for all admin pages */
+.admin-page #changelist-filter,
+.admin-page #changelist-search,
+.admin-page #searchbar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+
+/* Specific styling for search input in all admin pages */
+.admin-page #changelist-search {
+    background: white !important;
+    border: 3px solid var(--primary-500) !important;
+    color: var(--gray-800) !important;
+    font-weight: 600 !important;
+    font-size: var(--text-lg) !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Force search and filter visibility with high specificity */
+body #changelist-filter,
+body #changelist-search,
+body #searchbar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+
+/* Search input specific styling */
+body #changelist-search {
+    background: white !important;
+    border: 3px solid var(--primary-500) !important;
+    color: var(--gray-800) !important;
+    font-weight: 600 !important;
+    font-size: var(--text-lg) !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: var(--shadow-lg) !important;
+}
+
+/* Filter specific styling */
+body #changelist-filter {
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+    padding: var(--space-6) !important;
+    border-radius: var(--radius-xl) !important;
+}
+
+/* Ultimate search and filter visibility fix */
+#changelist-filter,
+#changelist-search,
+#searchbar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+    margin-bottom: var(--space-6) !important;
+    padding: var(--space-6) !important;
+    border-radius: var(--radius-xl) !important;
+}
+
+/* Ultimate search input fix */
+#changelist-search {
+    background: white !important;
+    border: 3px solid var(--primary-500) !important;
+    color: var(--gray-800) !important;
+    font-weight: 600 !important;
+    font-size: var(--text-lg) !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: var(--shadow-lg) !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 500px !important;
+}
+
+/* Force all search elements to be visible with maximum specificity */
+* #changelist-filter,
+* #changelist-search,
+* #searchbar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+}
+
+/* Final comprehensive search and filter visibility fix for all admin pages */
+#changelist-filter,
+#changelist-search,
+#searchbar,
+.changelist-search-container {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+    margin-bottom: var(--space-6) !important;
+    padding: var(--space-6) !important;
+    border-radius: var(--radius-xl) !important;
+}
+
+/* Final comprehensive search input fix for all admin pages */
+#changelist-search {
+    background: white !important;
+    border: 3px solid var(--primary-500) !important;
+    color: var(--gray-800) !important;
+    font-weight: 600 !important;
+    font-size: var(--text-lg) !important;
+    padding: 1rem 1.25rem !important;
+    box-shadow: var(--shadow-lg) !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 500px !important;
+}
+
+/* Force all search elements to be visible with maximum specificity */
+* #changelist-filter,
+* #changelist-search,
+* #searchbar {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    background: white !important;
+    border: 3px solid var(--primary-400) !important;
+    box-shadow: var(--shadow-xl) !important;
+}

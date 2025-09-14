@@ -1,0 +1,705 @@
+{% extends "admin/change_list_enhanced.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block title %}{{ title }} | {% trans 'نظام إدارة المستشفى' %}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script>
+// Define functions immediately in extrahead block
+function performSearch() {
+    try {
+        var searchInput = document.getElementById('searchbar');
+        
+        if (!searchInput) {
+            alert('Search input not found!');
+            return;
+        }
+        
+        var searchTerm = searchInput.value.trim();
+        var currentUrl = new URL(window.location);
+        
+        // Clear all existing search parameters first
+        currentUrl.searchParams.delete('q');
+        currentUrl.searchParams.delete('p'); // Remove pagination
+        currentUrl.searchParams.delete('is_active');
+        currentUrl.searchParams.delete('doctor');
+        currentUrl.searchParams.delete('gender');
+        
+        if (searchTerm) {
+            currentUrl.searchParams.set('q', searchTerm);
+        }
+        
+        var newUrl = currentUrl.toString();
+        
+        // Show loading state
+        var searchBtn = document.getElementById('search-button');
+        if (searchBtn) {
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري البحث...';
+            searchBtn.disabled = true;
+        }
+        
+        window.location.href = newUrl;
+    } catch (error) {
+        alert('Error in search: ' + error.message);
+    }
+}
+
+function clearSearch() {
+    console.log('=== clearSearch CALLED ===');
+    try {
+        var searchInput = document.getElementById('searchbar');
+        console.log('Search input element:', searchInput);
+        
+        if (searchInput) {
+            searchInput.value = '';
+            console.log('Cleared search input');
+        }
+        
+        var currentUrl = new URL(window.location);
+        
+        // Clear all search and filter parameters
+        currentUrl.searchParams.delete('q');
+        currentUrl.searchParams.delete('p');
+        currentUrl.searchParams.delete('is_active');
+        currentUrl.searchParams.delete('doctor');
+        currentUrl.searchParams.delete('gender');
+        currentUrl.searchParams.delete('created_at__gte');
+        currentUrl.searchParams.delete('created_at__lt');
+        
+        var newUrl = currentUrl.toString();
+        console.log('Redirecting to:', newUrl);
+        
+        // Show loading state
+        var clearBtn = document.getElementById('clear-button');
+        if (clearBtn) {
+            clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المسح...';
+            clearBtn.disabled = true;
+        }
+        
+        window.location.href = newUrl;
+    } catch (error) {
+        console.error('Error in clearSearch:', error);
+        alert('Error in clearSearch: ' + error.message);
+    }
+}
+
+// Attach to window object
+window.performSearch = performSearch;
+window.clearSearch = clearSearch;
+
+// Setup button event listeners
+function setupButtons() {
+    var searchBtn = document.getElementById('search-button') || document.querySelector('.btn-search');
+    var clearBtn = document.getElementById('clear-button') || document.querySelector('.btn-clear');
+    
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            performSearch();
+        });
+    }
+    
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            clearSearch();
+        });
+    }
+}
+
+// Setup buttons when DOM is ready
+document.addEventListener('DOMContentLoaded', setupButtons);
+</script>
+<style>
+    /* Enhanced Search and Filter UI */
+    .search-filter-container {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        margin: 20px 0;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+    }
+    
+    .search-filter-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px 24px;
+        margin: -24px -24px 20px -24px;
+        border-radius: 16px 16px 0 0;
+        font-size: 18px;
+        font-weight: 600;
+        text-align: right;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .search-filter-header i {
+        font-size: 20px;
+    }
+    
+    .search-form-container {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+    
+    .search-input-group {
+        flex: 1;
+        min-width: 300px;
+        position: relative;
+    }
+    
+    .search-input-group label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+    
+    .search-input-group input {
+        width: 100%;
+        padding: 12px 16px 12px 45px;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 14px;
+        color: #374151;
+        background: white;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .search-input-group input:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        outline: none;
+        transform: translateY(-1px);
+    }
+    
+    .search-input-group input::placeholder {
+        color: #9ca3af;
+        font-size: 14px;
+    }
+    
+    .search-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #9ca3af;
+        font-size: 16px;
+        pointer-events: none;
+    }
+    
+    .search-buttons {
+        display: flex;
+        gap: 8px;
+        align-items: end;
+    }
+    
+    .btn-search {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .btn-clear {
+        background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .btn-clear:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    
+    .quick-filters {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 16px;
+    }
+    
+    .quick-filter-btn {
+        background: white;
+        border: 2px solid #e2e8f0;
+        color: #374151;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+    }
+    
+    .quick-filter-btn:hover {
+        border-color: #667eea;
+        color: #667eea;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        text-decoration: none;
+    }
+    
+    .quick-filter-btn.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border-color: #667eea;
+    }
+    
+    .quick-filter-btn i {
+        font-size: 12px;
+    }
+    
+    /* Enhanced Table Styling */
+    .results {
+        background: white;
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        margin: 20px 0;
+    }
+    
+    .results th {
+        background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        color: #1f2937;
+        font-weight: 700;
+        padding: 16px 20px;
+        border-bottom: 2px solid #e5e7eb;
+        font-size: 14px;
+        text-align: right;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .results td {
+        padding: 16px 20px;
+        border-bottom: 1px solid #f3f4f6;
+        color: #374151;
+        font-size: 14px;
+        transition: all 0.2s ease;
+    }
+    
+    .results tr:hover {
+        background: #f8fafc;
+        transform: scale(1.005);
+    }
+    
+    .results tr:nth-child(even) {
+        background: #fafbfc;
+    }
+    
+    .results tr:nth-child(even):hover {
+        background: #f1f5f9;
+    }
+    
+    /* Status Badges */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 8px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+    }
+    
+    .status-badge.active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .status-badge.inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .status-badge i {
+        font-size: 10px;
+    }
+    
+    /* Loading Animation */
+    .loading-spinner {
+        display: inline-block;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #f3f3f3;
+        border-top: 2px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* No Results Styling */
+    .no-results-container {
+        background: white;
+        border-radius: 16px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        margin: 20px 0;
+    }
+    
+    .no-results-icon {
+        font-size: 64px;
+        color: #9ca3af;
+        margin-bottom: 24px;
+    }
+    
+    .no-results-title {
+        color: #374151;
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 16px;
+    }
+    
+    .no-results-message {
+        color: #6b7280;
+        font-size: 16px;
+        margin-bottom: 32px;
+        line-height: 1.6;
+    }
+    
+    .no-results-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .btn-refresh {
+        background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-decoration: none;
+    }
+    
+    .btn-refresh:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: white;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .search-form-container {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .search-input-group {
+            min-width: 100%;
+        }
+        
+        .search-buttons {
+            justify-content: center;
+        }
+        
+        .quick-filters {
+            justify-content: center;
+        }
+        
+        .results th,
+        .results td {
+            padding: 12px 8px;
+            font-size: 12px;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .search-filter-container {
+            padding: 16px;
+        }
+        
+        .search-filter-header {
+            padding: 12px 16px;
+            margin: -16px -16px 16px -16px;
+            font-size: 16px;
+        }
+        
+        .results th,
+        .results td {
+            padding: 8px 4px;
+            font-size: 11px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="search-filter-container fade-in">
+    <div class="search-filter-header">
+        <i class="fas fa-search"></i>
+        {{ title|default:"البحث والفلترة المتقدمة" }}
+    </div>
+    
+    <div class="search-form-container">
+        <div class="search-input-group">
+            <label for="searchbar">
+                <i class="fas fa-search"></i>
+                البحث في السجلات
+            </label>
+            <div style="position: relative;">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" name="q" value="{{ request.GET.q|default:'' }}" id="searchbar" placeholder="ابحث في الأسماء، الأرقام، أو أي معلومات أخرى...">
+            </div>
+        </div>
+        
+        <div class="search-buttons">
+            <button type="button" class="btn-search" id="search-button">
+                <i class="fas fa-search"></i>
+                بحث
+            </button>
+            <button type="button" class="btn-clear" id="clear-button">
+                <i class="fas fa-times"></i>
+                مسح
+            </button>
+        </div>
+    </div>
+    
+    <div class="quick-filters">
+        <a href="?is_active=1" class="quick-filter-btn {% if request.GET.is_active == '1' %}active{% endif %}">
+            <i class="fas fa-check-circle"></i>
+            نشط
+        </a>
+        <a href="?is_active=0" class="quick-filter-btn {% if request.GET.is_active == '0' %}active{% endif %}">
+            <i class="fas fa-times-circle"></i>
+            غير نشط
+        </a>
+        <a href="?created_at__gte=today" class="quick-filter-btn">
+            <i class="fas fa-calendar-day"></i>
+            اليوم
+        </a>
+        <a href="?created_at__gte=week" class="quick-filter-btn">
+            <i class="fas fa-calendar-week"></i>
+            هذا الأسبوع
+        </a>
+        <a href="?created_at__gte=month" class="quick-filter-btn">
+            <i class="fas fa-calendar-alt"></i>
+            هذا الشهر
+        </a>
+    </div>
+</div>
+
+{{ block.super }}
+{% endblock %}
+
+{% block extrajs %}
+{{ block.super }}
+<script>
+// Search functions for this template
+function performSearch() {
+    try {
+        var searchInput = document.getElementById('searchbar');
+        
+        if (!searchInput) {
+            alert('Search input not found!');
+            return;
+        }
+        
+        var searchTerm = searchInput.value.trim();
+        var currentUrl = new URL(window.location);
+        
+        // Clear all existing search parameters first
+        currentUrl.searchParams.delete('q');
+        currentUrl.searchParams.delete('p'); // Remove pagination
+        currentUrl.searchParams.delete('is_active');
+        currentUrl.searchParams.delete('doctor');
+        currentUrl.searchParams.delete('gender');
+        
+        if (searchTerm) {
+            currentUrl.searchParams.set('q', searchTerm);
+        }
+        
+        var newUrl = currentUrl.toString();
+        
+        // Show loading state
+        var searchBtn = document.getElementById('search-button');
+        if (searchBtn) {
+            searchBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري البحث...';
+            searchBtn.disabled = true;
+        }
+        
+        window.location.href = newUrl;
+    } catch (error) {
+        alert('Error in search: ' + error.message);
+    }
+}
+
+function clearSearch() {
+    try {
+        var searchInput = document.getElementById('searchbar');
+        
+        if (searchInput) {
+            searchInput.value = '';
+        }
+        
+        var currentUrl = new URL(window.location);
+        
+        // Clear all search and filter parameters
+        currentUrl.searchParams.delete('q');
+        currentUrl.searchParams.delete('p');
+        currentUrl.searchParams.delete('is_active');
+        currentUrl.searchParams.delete('doctor');
+        currentUrl.searchParams.delete('gender');
+        currentUrl.searchParams.delete('created_at__gte');
+        currentUrl.searchParams.delete('created_at__lt');
+        
+        var newUrl = currentUrl.toString();
+        
+        // Show loading state
+        var clearBtn = document.getElementById('clear-button');
+        if (clearBtn) {
+            clearBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري المسح...';
+            clearBtn.disabled = true;
+        }
+        
+        window.location.href = newUrl;
+    } catch (error) {
+        alert('Error in clear: ' + error.message);
+    }
+}
+
+// Attach to window object
+window.performSearch = performSearch;
+window.clearSearch = clearSearch;
+
+$(document).ready(function() {
+    // Setup button event listeners
+    var searchBtn = document.getElementById('search-button');
+    var clearBtn = document.getElementById('clear-button');
+    
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            performSearch();
+        });
+    }
+    
+    if (clearBtn) {
+        clearBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            clearSearch();
+        });
+    }
+    
+    // Auto-submit search on Enter key
+    $('#searchbar').on('keypress', function(e) {
+        if (e.which === 13) {
+            performSearch();
+        }
+    });
+    
+    // Check for no results and show message
+    function checkForNoResults() {
+        var resultsTable = $('.results table tbody');
+        var hasResults = resultsTable.length > 0 && resultsTable.find('tr').length > 0;
+        
+        if (!hasResults) {
+            var searchTerm = $('#searchbar').val();
+            var noResultsHtml = `
+                <div class="no-results-container">
+                    <div class="no-results-icon">
+                        <i class="fas fa-search"></i>
+                    </div>
+                    <h3 class="no-results-title">لا توجد نتائج</h3>
+                    <p class="no-results-message">
+                        ${searchTerm ? `لم يتم العثور على أي سجلات تطابق البحث عن "${searchTerm}"` : 'لا توجد سجلات متاحة للعرض'}
+                    </p>
+                    <div class="no-results-actions">
+                        ${searchTerm ? '<button type="button" class="btn-clear" onclick="clearSearch()"><i class="fas fa-times"></i> مسح البحث</button>' : ''}
+                        <a href="?" class="btn-refresh"><i class="fas fa-refresh"></i> تحديث الصفحة</a>
+                    </div>
+                </div>
+            `;
+            
+            $('.results').html(noResultsHtml);
+        }
+    }
+    
+    // Check for no results after page loads
+    setTimeout(checkForNoResults, 500);
+    
+    // Add fade-in animation to table rows
+    $('.results tr').each(function(index) {
+        $(this).css('animation-delay', (index * 0.05) + 's');
+        $(this).addClass('fade-in');
+    });
+    
+    // Enhanced hover effects
+    $('.results tr').hover(
+        function() {
+            $(this).find('td').css('background-color', '#f8fafc');
+        },
+        function() {
+            $(this).find('td').css('background-color', '');
+        }
+    );
+    
+    // Add status badges to active/inactive columns
+    $('.results td').each(function() {
+        var text = $(this).text().trim();
+        if (text === 'نعم' || text === 'Yes' || text === 'True') {
+            $(this).html('<span class="status-badge active"><i class="fas fa-check"></i> نشط</span>');
+        } else if (text === 'لا' || text === 'No' || text === 'False') {
+            $(this).html('<span class="status-badge inactive"><i class="fas fa-times"></i> غير نشط</span>');
+        }
+    });
+    
+    // Auto-focus search input
+    $('#searchbar').focus();
+});
+</script>
+{% endblock %}
