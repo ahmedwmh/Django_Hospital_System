@@ -5,18 +5,18 @@ services:
   github:
     repo: ahmedwmh/Django_Hospital_System
     branch: main
-  run_command: gunicorn hospital_system.wsgi:application --bind 0.0.0.0:8080 --workers 2 --timeout 120 --access-logfile - --error-logfile -
+  run_command: gunicorn hospital_system.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --access-logfile - --error-logfile -
   environment_slug: python
   instance_count: 1
   instance_size_slug: basic-xxs
-  http_port: 8080
+  http_port: $PORT
   health_check:
-    http_path: /
-    initial_delay_seconds: 30
-    period_seconds: 30
-    timeout_seconds: 10
+    http_path: /health/
+    initial_delay_seconds: 60
+    period_seconds: 10
+    timeout_seconds: 5
     success_threshold: 1
-    failure_threshold: 3
+    failure_threshold: 5
   envs:
   - key: DEBUG
     value: "False"
@@ -42,5 +42,11 @@ services:
     value: "8080"
   - key: PYTHONUNBUFFERED
     value: "1"
+  - key: DJANGO_SETTINGS_MODULE
+    value: "hospital_system.settings"
+  - key: PYTHONPATH
+    value: "/app"
+  - key: GUNICORN_CMD_ARGS
+    value: "--bind 0.0.0.0:$PORT --workers 2 --timeout 120 --access-logfile - --error-logfile -"
   routes:
   - path: /
