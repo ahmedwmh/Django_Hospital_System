@@ -19,8 +19,8 @@ DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1', cast=lambda v: [s.strip() for s in v.split(',')])
 
 # Add Digital Ocean domain if not already present
-if 'urchin-app-j2low.ondigitalocean.app' not in ALLOWED_HOSTS:
-    ALLOWED_HOSTS.append('urchin-app-j2low.ondigitalocean.app')
+if 'hospital-system-u3uy4.ondigitalocean.app' not in ALLOWED_HOSTS:
+    ALLOWED_HOSTS.append('hospital-system-u3uy4.ondigitalocean.app')
     ALLOWED_HOSTS.append('*.ondigitalocean.app')
 
 # Application definition

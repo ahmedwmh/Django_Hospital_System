@@ -1,50 +1,45 @@
 #!/bin/bash
 
-# DigitalOcean App Platform Redeployment Script
-# This script helps redeploy your Django Hospital System with correct configuration
+# DigitalOcean App Platform Redeploy Script
+# This script helps redeploy your Django Hospital System to DigitalOcean
 
-echo "🏥 DigitalOcean Hospital System Redeployment Script"
-echo "=================================================="
+echo "🏥 DigitalOcean Hospital System Redeploy Script"
+echo "=============================================="
 
-# Check if doctl is installed
-if ! command -v doctl &> /dev/null; then
-    echo "❌ doctl CLI not found. Please install it first:"
-    echo "   https://docs.digitalocean.com/reference/doctl/how-to/install/"
+# Check if we're in a git repository
+if [ ! -d ".git" ]; then
+    echo "❌ Error: Not in a git repository. Please run this from your project root."
     exit 1
 fi
 
-# Check if user is logged in
-if ! doctl account get &> /dev/null; then
-    echo "❌ Please login to DigitalOcean first:"
-    echo "   doctl auth init"
-    exit 1
+# Check if there are uncommitted changes
+if [ -n "$(git status --porcelain)" ]; then
+    echo "📝 Uncommitted changes detected. Committing them..."
+    git add .
+    git commit -m "Fix DigitalOcean deployment: update ALLOWED_HOSTS and add app.yaml"
 fi
 
-echo "✅ DigitalOcean CLI is ready"
-
-# Get app ID
-APP_ID=$(doctl apps list --format ID,Name --no-header | grep "hospital-system" | awk '{print $1}')
-
-if [ -z "$APP_ID" ]; then
-    echo "❌ App 'hospital-system' not found. Please check your app name."
-    exit 1
-fi
-
-echo "✅ Found app ID: $APP_ID"
-
-# Create deployment
-echo "🚀 Creating new deployment..."
-doctl apps create-deployment $APP_ID --wait
+# Push to main branch
+echo "🚀 Pushing changes to main branch..."
+git push origin main
 
 if [ $? -eq 0 ]; then
-    echo "✅ Deployment created successfully!"
-    echo "🌐 Your app should be available at: https://urchin-app-j2low.ondigitalocean.app/"
+    echo "✅ Code pushed successfully!"
     echo ""
     echo "📋 Next steps:"
-    echo "1. Wait 2-3 minutes for the deployment to complete"
-    echo "2. Check the app logs: doctl apps logs $APP_ID"
-    echo "3. If still having issues, try accessing from mobile data"
+    echo "1. Go to your DigitalOcean App Platform dashboard"
+    echo "2. Navigate to your 'hospital-system' app"
+    echo "3. Go to Settings → App-Level"
+    echo "4. Click 'Redeploy' or 'Force Deploy'"
+    echo "5. Wait for deployment to complete"
+    echo "6. Test your app at: https://hospital-system-u3uy4.ondigitalocean.app/"
+    echo ""
+    echo "🔍 If you still see DNS issues:"
+    echo "- Wait 5-10 minutes for DNS propagation"
+    echo "- Clear your DNS cache"
+    echo "- Try accessing from a different network"
+    echo "- Check the app logs in DigitalOcean dashboard"
 else
-    echo "❌ Deployment failed. Check the logs:"
-    echo "   doctl apps logs $APP_ID"
+    echo "❌ Failed to push changes. Please check your git configuration."
+    exit 1
 fi

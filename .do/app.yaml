@@ -1,37 +1,42 @@
-name: django-hospital-system
+name: hospital-system
 services:
-- name: web
+- name: django-hospital-system2
   source_dir: /
   github:
-    repo: ahmedwmh/djangoHospital
+    repo: ahmedwmh/Django_Hospital_System
     branch: main
-  build_command: pip install -r requirements.txt && python manage.py migrate --noinput && python manage.py collectstatic --noinput
-  run_command: gunicorn hospital_system.wsgi:application --bind 0.0.0.0:8000 --workers 1 --timeout 120 --access-logfile - --error-logfile -
+  run_command: gunicorn hospital_system.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --access-logfile - --error-logfile -
   environment_slug: python
   instance_count: 1
   instance_size_slug: basic-xxs
   http_port: 8000
-  routes:
-  - path: /
+  health_check:
+    http_path: /admin/
+    initial_delay_seconds: 10
+    period_seconds: 10
+    timeout_seconds: 5
+    success_threshold: 1
+    failure_threshold: 3
   envs:
   - key: DEBUG
-    value: "True"
+    value: "False"
   - key: SECRET_KEY
-    value: "django-insecure-change-this-in-production-$(openssl rand -hex 32)"
+    value: "g)t28v^-shs^idfcd5830yb92f)o%rgvooi78a72nvp+e9jow7"
   - key: ALLOWED_HOSTS
-    value: "urchin-app-j2low.ondigitalocean.app,localhost,127.0.0.1,*.ondigitalocean.app"
+    value: "hospital-system-u3uy4.ondigitalocean.app,localhost,127.0.0.1,*.ondigitalocean.app"
   - key: USE_POSTGRESQL
     value: "False"
-  - key: REDIS_URL
-    value: ""
   - key: STATIC_ROOT
     value: "/app/staticfiles"
   - key: MEDIA_ROOT
     value: "/app/media"
-
-databases:
-- name: hospital-db
-  engine: PG
-  version: "15"
-  size: db-s-1vcpu-1gb
-  num_nodes: 1
+  - key: LANGUAGE_CODE
+    value: "ar"
+  - key: TIME_ZONE
+    value: "Asia/Baghdad"
+  - key: EMAIL_BACKEND
+    value: "django.core.mail.backends.console.EmailBackend"
+  - key: REDIS_URL
+    value: ""
+  routes:
+  - path: /
