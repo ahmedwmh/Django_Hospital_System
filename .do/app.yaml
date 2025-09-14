@@ -5,11 +5,11 @@ services:
   github:
     repo: ahmedwmh/Django_Hospital_System
     branch: main
-  run_command: gunicorn hospital_system.wsgi:application --bind 0.0.0.0:$PORT --workers 2 --timeout 120 --access-logfile - --error-logfile -
+  run_command: gunicorn hospital_system.wsgi:application --bind 0.0.0.0:8080 --workers 2 --timeout 120 --access-logfile - --error-logfile -
   environment_slug: python
   instance_count: 1
   instance_size_slug: basic-xxs
-  http_port: 8000
+  http_port: 8080
   health_check:
     http_path: /
     initial_delay_seconds: 30
@@ -38,5 +38,9 @@ services:
     value: "django.core.mail.backends.console.EmailBackend"
   - key: REDIS_URL
     value: ""
+  - key: PORT
+    value: "8080"
+  - key: PYTHONUNBUFFERED
+    value: "1"
   routes:
   - path: /
